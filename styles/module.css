@@ -1,0 +1,165 @@
+#macro-directory .directory-footer .ld-hydez-config {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  width: 100%;
+  justify-content: center;
+}
+
+#macro-directory .directory-footer .ld-hydez-config i {
+  margin: 0;
+}
+
+#hide-hotbar-config {
+  min-width: 720px;
+}
+
+#hide-hotbar-config .window-content {
+  padding: 0;
+}
+
+.ld-hydez-config__header {
+  display: flex;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--color-border-light-primary);
+}
+
+.ld-hydez-config__header h1 {
+  margin: 0 0 0.35rem;
+  font-size: 1.5rem;
+}
+
+.ld-hydez-config .main-tabs {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem 0;
+  border-bottom: 1px solid var(--color-border-light-primary);
+}
+
+.ld-hydez-config .main-tabs .item {
+  padding: 0.45rem 0.8rem;
+  border: 1px solid transparent;
+  border-bottom: none;
+  border-radius: 8px 8px 0 0;
+}
+
+.ld-hydez-config .main-tabs .item.active {
+  background: rgb(255 255 255 / 6%);
+  border-color: var(--color-border-light-primary);
+}
+
+.ld-hydez-config .content {
+  padding: 1rem 1.25rem 1.25rem;
+  max-height: 70vh;
+  overflow: auto;
+}
+
+.ld-hydez-config__panel {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--color-border-light-primary);
+  border-radius: 10px;
+  background: rgb(0 0 0 / 8%);
+}
+
+.ld-hydez-config__panel:last-child {
+  margin-bottom: 0;
+}
+
+.ld-hydez-config__panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.ld-hydez-config__actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.ld-hydez-config__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.75rem;
+}
+
+.ld-hydez-config__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.75rem;
+  border: 1px solid rgb(255 255 255 / 8%);
+  border-radius: 8px;
+  background: rgb(255 255 255 / 3%);
+}
+
+.ld-hydez-config__field small,
+.ld-hydez-config .notes {
+  color: var(--color-text-light-6);
+}
+
+.checkbox-field {
+  justify-content: flex-start;
+}
+
+.checkbox-field input {
+  margin: 0 0 0.3rem;
+}
+
+.range-field input[type="range"] {
+  width: 100%;
+}
+
+.ld-hydez-config__slots {
+  display: grid;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.slot-toggle,
+.page-toggle,
+.sidebar-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid rgb(255 255 255 / 8%);
+  border-radius: 8px;
+  background: rgb(255 255 255 / 3%);
+}
+
+.page-toggle,
+.sidebar-toggle {
+  justify-content: flex-start;
+}
+
+.slot-toggle {
+  justify-content: center;
+}
+
+.ld-hydez-config__pages,
+.ld-hydez-config__sidebar-tabs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.5rem;
+}
+
+.ld-hydez-config__preset-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 0.5rem;
+}
+
+.player-panel__header h2,
+.ld-hydez-config__panel h2,
+.ld-hydez-config__panel h3 {
+  margin: 0 0 0.35rem;
+}
+
+#hide-hotbar-config .sheet-footer {
+  padding: 0 1.25rem 1.25rem;
+}

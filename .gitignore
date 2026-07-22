@@ -1,0 +1,37 @@
+# Build and minification artifacts
+*.min.js
+*.min.json
+*.min.css
+module.min.js
+module.min.json
+module.json.sig
+module.json.min
+*-encrypted.js
+*-encrypted.min.js
+
+# Protection/build files
+build-protected.ps1
+build-protected.log
+protected/
+
+# Node dependencies
+node_modules/
+package-lock.json
+npm-debug.log
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+
+# Environment
+.env
+.env.local
+
+# Release output
+.release-temp/
+module.zip

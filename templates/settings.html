@@ -1,0 +1,236 @@
+<form class="ld-hydez-config" autocomplete="off">
+  <header class="ld-hydez-config__header">
+    <div>
+      <h1>{{title}}</h1>
+      <p>{{globalNotes}}</p>
+    </div>
+  </header>
+
+  <nav class="sheet-tabs tabs main-tabs" data-group="primary" aria-label="{{title}}">
+    <a class="item" data-tab="gm">{{gmTabLabel}}</a>
+    <a class="item" data-tab="players">{{playerTabLabel}}</a>
+  </nav>
+
+  <section class="content">
+    <div class="tab" data-group="primary" data-tab="gm">
+      <section class="ld-hydez-config__panel">
+        <h2>{{globalHeader}}</h2>
+        <p class="notes">{{globalNotes}}</p>
+
+        <div class="ld-hydez-config__grid">
+          <label class="ld-hydez-config__field checkbox-field">
+            <input type="checkbox" name="hideBackground" {{#if hideBackground}}checked{{/if}}>
+            <span>{{localize "LDH.Config.General.HideBackground"}}</span>
+            <small>{{localize "LDH.Config.General.HideBackgroundHint"}}</small>
+          </label>
+          <label class="ld-hydez-config__field checkbox-field">
+            <input type="checkbox" name="applyToGM" {{#if applyToGM}}checked{{/if}}>
+            <span>{{localize "LDH.Config.General.ApplyToGM"}}</span>
+            <small>{{localize "LDH.Config.General.ApplyToGMHint"}}</small>
+          </label>
+          <label class="ld-hydez-config__field checkbox-field">
+            <input type="checkbox" name="hideLeftControls" {{#if hideLeftControls}}checked{{/if}}>
+            <span>{{localize "LDH.Config.General.HideLeftControls"}}</span>
+            <small>{{localize "LDH.Config.General.HideLeftControlsHint"}}</small>
+          </label>
+          <label class="ld-hydez-config__field checkbox-field">
+            <input type="checkbox" name="hideRightControls" {{#if hideRightControls}}checked{{/if}}>
+            <span>{{localize "LDH.Config.General.HideRightControls"}}</span>
+            <small>{{localize "LDH.Config.General.HideRightControlsHint"}}</small>
+          </label>
+          <label class="ld-hydez-config__field checkbox-field">
+            <input type="checkbox" name="hideSidebar" {{#if hideSidebar}}checked{{/if}}>
+            <span>{{localize "LDH.Config.General.HideSidebar"}}</span>
+            <small>{{localize "LDH.Config.General.HideSidebarHint"}}</small>
+          </label>
+          <label class="ld-hydez-config__field checkbox-field">
+            <input type="checkbox" name="hideSceneControls" {{#if hideSceneControls}}checked{{/if}}>
+            <span>{{localize "LDH.Config.General.HideSceneControls"}}</span>
+            <small>{{localize "LDH.Config.General.HideSceneControlsHint"}}</small>
+          </label>
+          <label class="ld-hydez-config__field checkbox-field">
+            <input type="checkbox" name="hideEntireHotbar" {{#if hideEntireHotbar}}checked{{/if}}>
+            <span>{{localize "LDH.Config.General.HideEntireHotbar"}}</span>
+            <small>{{localize "LDH.Config.General.HideEntireHotbarHint"}}</small>
+          </label>
+          <label class="ld-hydez-config__field checkbox-field">
+            <input type="checkbox" name="hideChat" {{#if hideChat}}checked{{/if}}>
+            <span>{{localize "LDH.Config.General.HideChat"}}</span>
+            <small>{{localize "LDH.Config.General.HideChatHint"}}</small>
+          </label>
+          <label class="ld-hydez-config__field checkbox-field">
+            <input type="checkbox" name="hidePlayers" {{#if hidePlayers}}checked{{/if}}>
+            <span>{{localize "LDH.Config.General.HidePlayers"}}</span>
+            <small>{{localize "LDH.Config.General.HidePlayersHint"}}</small>
+          </label>
+          <label class="ld-hydez-config__field checkbox-field">
+            <input type="checkbox" name="hideSceneNavigation" {{#if hideSceneNavigation}}checked{{/if}}>
+            <span>{{localize "LDH.Config.General.HideSceneNavigation"}}</span>
+            <small>{{localize "LDH.Config.General.HideSceneNavigationHint"}}</small>
+          </label>
+          <label class="ld-hydez-config__field checkbox-field">
+            <input type="checkbox" name="hideMacroDirectory" {{#if hideMacroDirectory}}checked{{/if}}>
+            <span>{{localize "LDH.Config.General.HideMacroDirectory"}}</span>
+            <small>{{localize "LDH.Config.General.HideMacroDirectoryHint"}}</small>
+          </label>
+          <label class="ld-hydez-config__field range-field">
+            <span>{{localize "LDH.Config.General.Opacity"}}</span>
+            <input type="range" name="opacity" min="0" max="100" step="5" value="{{opacity}}">
+            <small>{{localize "LDH.Config.General.OpacityHint"}}</small>
+          </label>
+          <label class="ld-hydez-config__field range-field">
+            <span>{{localize "LDH.Config.General.AnimationDuration"}}</span>
+            <input type="range" name="animationDuration" min="0" max="1000" step="50" value="{{animationDuration}}">
+            <small>{{localize "LDH.Config.General.AnimationDurationHint"}}</small>
+          </label>
+        </div>
+      </section>
+
+      <section class="ld-hydez-config__panel">
+        <div class="ld-hydez-config__panel-header">
+          <div>
+            <h2>{{hotbarSlotsHeader}}</h2>
+            <p class="notes">{{localize "LDH.Config.Slots.Notes"}}</p>
+          </div>
+          <div class="ld-hydez-config__actions">
+            <button type="button" class="select-all-slots">{{localize "LDH.Config.Slots.SelectAll"}}</button>
+            <button type="button" class="select-none-slots">{{localize "LDH.Config.Slots.ClearAll"}}</button>
+          </div>
+        </div>
+        <div class="ld-hydez-config__slots">
+          {{#each slots}}
+            <label class="slot-toggle">
+              <input type="checkbox" name="slot-{{n}}" {{#if hidden}}checked{{/if}}>
+              <span>{{n}}</span>
+            </label>
+          {{/each}}
+        </div>
+      </section>
+
+      <section class="ld-hydez-config__panel">
+        <h2>{{hotbarPagesHeader}}</h2>
+        <p class="notes">{{localize "LDH.Config.Pages.Notes"}}</p>
+        <div class="ld-hydez-config__pages">
+          {{#each pages}}
+            <label class="page-toggle">
+              <input class="page-checkbox" type="checkbox" name="page-{{n}}" data-page="{{n}}" {{#if hidden}}checked{{/if}}>
+              <span>{{localize "LDH.Config.Pages.Page"}} {{n}}</span>
+              <small>{{localize "LDH.Config.Pages.Slots"}} {{multiply (subtract n 1) 10}}-{{multiply n 10}}</small>
+            </label>
+          {{/each}}
+        </div>
+      </section>
+
+      <section class="ld-hydez-config__panel">
+        <h2>{{sidebarHeader}}</h2>
+        <p class="notes">{{localize "LDH.Config.SidebarPlayerNotes"}}</p>
+        <div class="ld-hydez-config__sidebar-tabs">
+          {{#each sidebarTabs}}
+            <label class="sidebar-toggle">
+              <input type="checkbox" name="sidebar-tab-{{id}}" {{#if hidden}}checked{{/if}}>
+              <i class="{{icon}}"></i>
+              <span>{{label}}</span>
+            </label>
+          {{/each}}
+        </div>
+      </section>
+
+      <section class="ld-hydez-config__panel">
+        <h2>{{presetsHeader}}</h2>
+        <p class="notes">{{localize "LDH.Config.Presets.Notes"}}</p>
+        <div class="ld-hydez-config__preset-row">
+          <select name="load-preset" class="load-preset">
+            <option value="">{{localize "LDH.Config.Presets.Select"}}</option>
+            {{#each presets}}
+              <option value="{{index}}" {{#if selected}}selected{{/if}}>{{name}}</option>
+            {{/each}}
+          </select>
+          <button type="button" class="save-preset">{{localize "LDH.Config.Presets.SaveNew"}}</button>
+          <button type="button" class="delete-preset">{{localize "LDH.Config.Presets.Delete"}}</button>
+        </div>
+      </section>
+
+      <section class="ld-hydez-config__panel">
+        <h2>{{advancedHeader}}</h2>
+        <p class="notes">{{localize "LDH.Config.Advanced.Notes"}}</p>
+        <div class="ld-hydez-config__actions">
+          <button type="button" class="export-config">{{localize "LDH.Config.Advanced.ExportButton"}}</button>
+          <button type="button" class="import-config">{{localize "LDH.Config.Advanced.ImportButton"}}</button>
+        </div>
+      </section>
+    </div>
+
+    <div class="tab" data-group="primary" data-tab="players">
+      {{#if players.length}}
+        {{#each players}}
+          <section class="ld-hydez-config__panel player-panel">
+            <header class="player-panel__header">
+              <h2>{{localize "LDH.Config.PlayerHeader" name=name}}</h2>
+              <p class="notes">{{localize "LDH.Config.PlayerNotes"}}</p>
+            </header>
+
+            <div class="ld-hydez-config__grid">
+              <label class="ld-hydez-config__field checkbox-field"><input type="checkbox" name="player-{{id}}-hideSceneControls" {{#if settings.hideSceneControls}}checked{{/if}}><span>{{localize "LDH.Config.General.HideSceneControls"}}</span></label>
+              <label class="ld-hydez-config__field checkbox-field"><input type="checkbox" name="player-{{id}}-hideSidebar" {{#if settings.hideSidebar}}checked{{/if}}><span>{{localize "LDH.Config.General.HideSidebar"}}</span></label>
+              <label class="ld-hydez-config__field checkbox-field"><input type="checkbox" name="player-{{id}}-hideEntireHotbar" {{#if settings.hideEntireHotbar}}checked{{/if}}><span>{{localize "LDH.Config.General.HideEntireHotbar"}}</span></label>
+              <label class="ld-hydez-config__field checkbox-field"><input type="checkbox" name="player-{{id}}-hideBackground" {{#if settings.hideBackground}}checked{{/if}}><span>{{localize "LDH.Config.General.HideBackground"}}</span></label>
+              <label class="ld-hydez-config__field checkbox-field"><input type="checkbox" name="player-{{id}}-hideLeftControls" {{#if settings.hideLeftControls}}checked{{/if}}><span>{{localize "LDH.Config.General.HideLeftControls"}}</span></label>
+              <label class="ld-hydez-config__field checkbox-field"><input type="checkbox" name="player-{{id}}-hideRightControls" {{#if settings.hideRightControls}}checked{{/if}}><span>{{localize "LDH.Config.General.HideRightControls"}}</span></label>
+              <label class="ld-hydez-config__field checkbox-field"><input type="checkbox" name="player-{{id}}-hideChat" {{#if settings.hideChat}}checked{{/if}}><span>{{localize "LDH.Config.General.HideChat"}}</span></label>
+              <label class="ld-hydez-config__field checkbox-field"><input type="checkbox" name="player-{{id}}-hidePlayers" {{#if settings.hidePlayers}}checked{{/if}}><span>{{localize "LDH.Config.General.HidePlayers"}}</span></label>
+              <label class="ld-hydez-config__field checkbox-field"><input type="checkbox" name="player-{{id}}-hideSceneNavigation" {{#if settings.hideSceneNavigation}}checked{{/if}}><span>{{localize "LDH.Config.General.HideSceneNavigation"}}</span></label>
+            </div>
+
+            <div class="ld-hydez-config__panel-header">
+              <h3>{{../hotbarSlotsHeader}}</h3>
+              <div class="ld-hydez-config__actions">
+                <button type="button" class="select-all-player-slots" data-player="{{id}}">{{localize "LDH.Config.Slots.SelectAll"}}</button>
+                <button type="button" class="select-none-player-slots" data-player="{{id}}">{{localize "LDH.Config.Slots.ClearAll"}}</button>
+              </div>
+            </div>
+            <div class="ld-hydez-config__slots">
+              {{#each slots}}
+                <label class="slot-toggle">
+                  <input type="checkbox" name="player-{{../id}}-slot-{{n}}" {{#if hidden}}checked{{/if}}>
+                  <span>{{n}}</span>
+                </label>
+              {{/each}}
+            </div>
+
+            <h3>{{../hotbarPagesHeader}}</h3>
+            <div class="ld-hydez-config__pages">
+              {{#each pages}}
+                <label class="page-toggle">
+                  <input class="page-checkbox-player" type="checkbox" name="player-{{../id}}-page-{{n}}" data-player="{{../id}}" data-page="{{n}}" {{#if hidden}}checked{{/if}}>
+                  <span>{{localize "LDH.Config.Pages.Page"}} {{n}}</span>
+                </label>
+              {{/each}}
+            </div>
+
+            <h3>{{../sidebarHeader}}</h3>
+            <div class="ld-hydez-config__sidebar-tabs">
+              {{#each sidebarTabs}}
+                <label class="sidebar-toggle">
+                  <input type="checkbox" name="player-{{../id}}-sidebar-tab-{{id}}" {{#if hidden}}checked{{/if}}>
+                  <i class="{{icon}}"></i>
+                  <span>{{label}}</span>
+                </label>
+              {{/each}}
+            </div>
+          </section>
+        {{/each}}
+      {{else}}
+        <section class="ld-hydez-config__panel">
+          <p class="notes">{{noPlayersText}}</p>
+        </section>
+      {{/if}}
+    </div>
+  </section>
+
+  <footer class="sheet-footer flexrow">
+    <button type="submit">
+      <i class="fas fa-save"></i>
+      {{localize "LDH.Config.Save"}}
+    </button>
+  </footer>
+</form>
