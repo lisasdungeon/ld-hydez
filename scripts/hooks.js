@@ -7,6 +7,7 @@ import { MODULE_ID, KEYBINDINGS } from "./constants.js";
 import { HideHotbarConfig } from "./config.js";
 import { updateHotbarStyles } from "./styles.js";
 import { log } from "./utils.js";
+import { escapeHtml } from "./utils/escapeHtml.js";
 
 /**
  * Initialize hook - register keybindings
@@ -49,7 +50,7 @@ export function renderMacroDirectoryHook(app, html) {
   const button = document.createElement("button");
   button.className = "ld-hydez-config";
   button.type = "button";
-  button.innerHTML = `<i class="fas fa-eye-slash"></i> ${game.i18n.localize("LDH.Title")}`;
+  button.innerHTML = `<i class="fas fa-eye-slash"></i> ${escapeHtml(game.i18n.localize("LDH.Title"))}`;
   button.addEventListener("click", () => {
     new HideHotbarConfig().render(true);
   });
