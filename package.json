@@ -1,13 +1,13 @@
 {
   "name": "ld-hydez",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "description": "Hotbar customization with per-user visibility rules, presets, opacity control, and animated interface hiding for Foundry VTT.",
   "type": "module",
   "main": "scripts/module.js",
   "scripts": {
-    "test": "node --test tests/",
+    "test": "node --test 'tests/**/*.test.mjs'",
     "build": "node scripts/build-release.mjs",
-    "test:coverage": "node --test --experimental-test-coverage tests/"
+    "test:coverage": "node --test --experimental-test-coverage 'tests/**/*.test.mjs'"
   },
   "keywords": [
     "foundry",
@@ -16,6 +16,12 @@
     "v13"
   ],
   "author": "Lisa's Dungeon",
+  "contributors": [
+    {
+      "name": "Lisa's Dungeon",
+      "url": "https://github.com/lisasdungeon"
+    }
+  ],
   "license": "Proprietary",
   "repository": {
     "type": "git",

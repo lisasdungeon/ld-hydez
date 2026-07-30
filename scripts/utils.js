@@ -3,7 +3,7 @@
  * All Rights Reserved
  */
 
-import { MODULE_ID, CSS_IDS } from "./constants.js";
+import { MODULE_ID, CSS_IDS, SIDEBAR_TAB_IDS } from "./constants.js";
 
 function i18n(key, data = {}) {
   const localized = game.i18n?.localize?.(key);
@@ -66,6 +66,79 @@ export function getSlotsForPage(page) {
   if (!isValidPage(page)) return [];
   const start = (page - 1) * 10 + 1;
   return Array.from({ length: 10 }, (_, i) => start + i);
+}
+
+/**
+ * Reduce an arbitrary hiddenSlots-shaped object down to only valid slot keys
+ * with boolean values. Slot keys and sidebar tab ids from this object are
+ * interpolated directly into a dynamically generated CSS <style> element
+ * (see styles.js), so untrusted input (an imported config file) must never
+ * reach there un-validated - a crafted key could break out of the CSS
+ * attribute-selector string and inject arbitrary rules world-wide.
+ * @param {object} value
+ * @returns {object}
+ */
+export function sanitizeHiddenSlots(value) {
+  const result = {};
+  if (!value || typeof value !== "object") return result;
+  for (const [key, hidden] of Object.entries(value)) {
+    const slot = parseInt(key, 10);
+    if (isValidSlot(slot)) result[slot] = Boolean(hidden);
+  }
+  return result;
+}
+
+/**
+ * Reduce an arbitrary hiddenPages-shaped array down to only valid, unique page numbers.
+ * @param {*} value
+ * @returns {number[]}
+ */
+export function sanitizeHiddenPages(value) {
+  if (!Array.isArray(value)) return [];
+  const pages = value.map(v => parseInt(v, 10)).filter(isValidPage);
+  return Array.from(new Set(pages));
+}
+
+/**
+ * Reduce an arbitrary hiddenSidebarTabs-shaped array down to only known tab ids.
+ * @param {*} value
+ * @returns {string[]}
+ */
+export function sanitizeSidebarTabs(value) {
+  if (!Array.isArray(value)) return [];
+  const tabs = value.filter(id => SIDEBAR_TAB_IDS.includes(id));
+  return Array.from(new Set(tabs));
+}
+
+/**
+ * Sanitize an imported perPlayerSettings object: only keep entries for real,
+ * currently-known users, coerce booleans, and run nested slots/pages/tabs
+ * through the same validators as the top-level fields.
+ * @param {*} value
+ * @returns {object}
+ */
+export function sanitizePerPlayerSettings(value) {
+  const result = {};
+  if (!value || typeof value !== "object") return result;
+  const knownUserIds = new Set((game.users ?? []).map(u => u.id));
+  for (const [userId, settings] of Object.entries(value)) {
+    if (!knownUserIds.has(userId) || !settings || typeof settings !== "object") continue;
+    result[userId] = {
+      hideSceneControls: Boolean(settings.hideSceneControls),
+      hideSidebar: Boolean(settings.hideSidebar),
+      hideEntireHotbar: Boolean(settings.hideEntireHotbar),
+      hideBackground: Boolean(settings.hideBackground),
+      hideLeftControls: Boolean(settings.hideLeftControls),
+      hideRightControls: Boolean(settings.hideRightControls),
+      hideChat: Boolean(settings.hideChat),
+      hidePlayers: Boolean(settings.hidePlayers),
+      hideSceneNavigation: Boolean(settings.hideSceneNavigation),
+      hiddenSlots: sanitizeHiddenSlots(settings.hiddenSlots),
+      hiddenPages: sanitizeHiddenPages(settings.hiddenPages),
+      hiddenSidebarTabs: sanitizeSidebarTabs(settings.hiddenSidebarTabs)
+    };
+  }
+  return result;
 }
 
 /**

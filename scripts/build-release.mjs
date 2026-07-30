@@ -14,11 +14,18 @@ fs.rmSync(tempDir, { recursive: true, force: true });
 fs.rmSync(zipPath, { force: true });
 fs.mkdirSync(tempDir, { recursive: true });
 
+// Dev-only tooling that lives alongside the Foundry esmodules but is never
+// declared in module.json and should not ship in the release zip.
+const excludeScriptFiles = new Set(["build-release.mjs", "validate.mjs"]);
+
 for (const entry of includeTopLevel) {
   const source = path.join(root, entry);
   if (!fs.existsSync(source)) continue;
   const target = path.join(tempDir, entry);
-  fs.cpSync(source, target, { recursive: true });
+  fs.cpSync(source, target, {
+    recursive: true,
+    filter: (src) => !excludeScriptFiles.has(path.basename(src))
+  });
 }
 
 if (process.platform === 'win32') {
@@ -26,7 +33,7 @@ if (process.platform === 'win32') {
   const command = `Compress-Archive -Path '${archiveSource}' -DestinationPath '${zipPath}' -Force`;
   execFileSync("powershell", ["-NoProfile", "-Command", command], { stdio: "inherit" });
 } else {
-  execFileSync("zip", ["-r", zipPath, "."], { cwd: tempDir, stdio: "inherit" });
+  execFileSync("zip", ["-r", "-X", zipPath, "."], { cwd: tempDir, stdio: "inherit" });
 }
 
 fs.rmSync(tempDir, { recursive: true, force: true });

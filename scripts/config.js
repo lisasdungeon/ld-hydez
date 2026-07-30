@@ -3,8 +3,11 @@
  * All Rights Reserved
  */
 
-import { MODULE_ID, SETTINGS, HOTBAR } from "./constants.js";
-import { getSetting, setSetting, isValidSlot, log, notify, localize } from "./utils.js";
+import { MODULE_ID, SETTINGS, HOTBAR, SIDEBAR_TAB_IDS } from "./constants.js";
+import {
+  getSetting, setSetting, isValidSlot, log, notify, localize,
+  sanitizeHiddenSlots, sanitizeHiddenPages, sanitizeSidebarTabs, sanitizePerPlayerSettings
+} from "./utils.js";
 import { updateHotbarStyles } from "./styles.js";
 
 /**
@@ -332,25 +335,46 @@ export class HideHotbarConfig extends FormApplication {
         const text = await file.text();
         const config = JSON.parse(text);
 
-        // Validate and apply
-        if (config.hiddenSlots) await setSetting(SETTINGS.HIDDEN_SLOTS, config.hiddenSlots);
-        if (config.hideBackground !== undefined) await setSetting(SETTINGS.HIDE_BACKGROUND, config.hideBackground);
-        if (config.applyToGM !== undefined) await setSetting(SETTINGS.APPLY_TO_GM, config.applyToGM);
-        if (config.hideLeftControls !== undefined) await setSetting(SETTINGS.HIDE_LEFT_CONTROLS, config.hideLeftControls);
-        if (config.hideRightControls !== undefined) await setSetting(SETTINGS.HIDE_RIGHT_CONTROLS, config.hideRightControls);
-        if (config.hideSidebar !== undefined) await setSetting(SETTINGS.HIDE_SIDEBAR, config.hideSidebar);
-        if (config.hideSceneControls !== undefined) await setSetting(SETTINGS.HIDE_SCENE_CONTROLS, config.hideSceneControls);
-        if (config.hideEntireHotbar !== undefined) await setSetting(SETTINGS.HIDE_ENTIRE_HOTBAR, config.hideEntireHotbar);
-        if (config.hideChat !== undefined) await setSetting(SETTINGS.HIDE_CHAT, config.hideChat);
-        if (config.hidePlayers !== undefined) await setSetting(SETTINGS.HIDE_PLAYERS, config.hidePlayers);
-        if (config.hideSceneNavigation !== undefined) await setSetting(SETTINGS.HIDE_SCENE_NAVIGATION, config.hideSceneNavigation);
-        if (config.hideMacroDirectory !== undefined) await setSetting(SETTINGS.HIDE_MACRO_DIRECTORY, config.hideMacroDirectory);
-        if (config.opacity !== undefined) await setSetting(SETTINGS.OPACITY, config.opacity);
-        if (config.animationDuration !== undefined) await setSetting(SETTINGS.ANIMATION_DURATION, config.animationDuration);
-        if (config.hiddenPages) await setSetting(SETTINGS.HIDDEN_PAGES, config.hiddenPages);
-        if (config.hiddenSidebarTabs) await setSetting(SETTINGS.HIDDEN_SIDEBAR_TABS, config.hiddenSidebarTabs);
-        if (config.presets) await setSetting(SETTINGS.PRESETS, config.presets);
-        if (config.perPlayerSettings) await setSetting(SETTINGS.PER_PLAYER_SETTINGS, config.perPlayerSettings);
+        // Every one of these values ends up interpolated into a dynamically
+        // generated, world-wide <style> element (see styles.js). An imported
+        // file is untrusted input - shared "preset" files are exactly the
+        // kind of thing that gets passed around a community - so every field
+        // is validated/clamped the same way the form's own save path
+        // (_updateObject) already validates its own formData, rather than
+        // being trusted as-is.
+        if (config.hiddenSlots) await setSetting(SETTINGS.HIDDEN_SLOTS, sanitizeHiddenSlots(config.hiddenSlots));
+        if (config.hideBackground !== undefined) await setSetting(SETTINGS.HIDE_BACKGROUND, Boolean(config.hideBackground));
+        if (config.applyToGM !== undefined) await setSetting(SETTINGS.APPLY_TO_GM, Boolean(config.applyToGM));
+        if (config.hideLeftControls !== undefined) await setSetting(SETTINGS.HIDE_LEFT_CONTROLS, Boolean(config.hideLeftControls));
+        if (config.hideRightControls !== undefined) await setSetting(SETTINGS.HIDE_RIGHT_CONTROLS, Boolean(config.hideRightControls));
+        if (config.hideSidebar !== undefined) await setSetting(SETTINGS.HIDE_SIDEBAR, Boolean(config.hideSidebar));
+        if (config.hideSceneControls !== undefined) await setSetting(SETTINGS.HIDE_SCENE_CONTROLS, Boolean(config.hideSceneControls));
+        if (config.hideEntireHotbar !== undefined) await setSetting(SETTINGS.HIDE_ENTIRE_HOTBAR, Boolean(config.hideEntireHotbar));
+        if (config.hideChat !== undefined) await setSetting(SETTINGS.HIDE_CHAT, Boolean(config.hideChat));
+        if (config.hidePlayers !== undefined) await setSetting(SETTINGS.HIDE_PLAYERS, Boolean(config.hidePlayers));
+        if (config.hideSceneNavigation !== undefined) await setSetting(SETTINGS.HIDE_SCENE_NAVIGATION, Boolean(config.hideSceneNavigation));
+        if (config.hideMacroDirectory !== undefined) await setSetting(SETTINGS.HIDE_MACRO_DIRECTORY, Boolean(config.hideMacroDirectory));
+        if (config.opacity !== undefined) await setSetting(SETTINGS.OPACITY, Math.min(100, Math.max(0, parseInt(config.opacity, 10) || 0)));
+        if (config.animationDuration !== undefined) await setSetting(SETTINGS.ANIMATION_DURATION, Math.min(1000, Math.max(0, parseInt(config.animationDuration, 10) || 0)));
+        if (config.hiddenPages) await setSetting(SETTINGS.HIDDEN_PAGES, sanitizeHiddenPages(config.hiddenPages));
+        if (config.hiddenSidebarTabs) await setSetting(SETTINGS.HIDDEN_SIDEBAR_TABS, sanitizeSidebarTabs(config.hiddenSidebarTabs));
+        if (Array.isArray(config.presets)) {
+          const presets = config.presets
+            .filter(preset => preset && typeof preset.name === "string" && preset.config && typeof preset.config === "object")
+            .map(preset => ({
+              name: preset.name,
+              config: {
+                hiddenSlots: sanitizeHiddenSlots(preset.config.hiddenSlots),
+                hideBackground: Boolean(preset.config.hideBackground),
+                hideLeftControls: Boolean(preset.config.hideLeftControls),
+                hideRightControls: Boolean(preset.config.hideRightControls),
+                opacity: Math.min(100, Math.max(0, parseInt(preset.config.opacity, 10) || 0)),
+                hiddenPages: sanitizeHiddenPages(preset.config.hiddenPages)
+              }
+            }));
+          await setSetting(SETTINGS.PRESETS, presets);
+        }
+        if (config.perPlayerSettings) await setSetting(SETTINGS.PER_PLAYER_SETTINGS, sanitizePerPlayerSettings(config.perPlayerSettings));
 
         updateHotbarStyles();
         notify(localize("LDH.Notify.ConfigImported"), "info");
@@ -385,8 +409,7 @@ export class HideHotbarConfig extends FormApplication {
       }
 
       // Process sidebar tabs
-      const tabIds = ["chat", "combat", "scenes", "actors", "items", "journal", "tables", "cards", "playlists", "compendium", "settings", "macros"];
-      tabIds.forEach(id => {
+      SIDEBAR_TAB_IDS.forEach(id => {
         const key = `sidebar-tab-${id}`;
         if (formData[key]) {
           hiddenSidebarTabs.push(id);
@@ -425,12 +448,11 @@ export class HideHotbarConfig extends FormApplication {
         }
 
         // Process player-specific sidebar tabs
-      const sidebarTabIds = ["chat", "combat", "scenes", "actors", "items", "journal", "tables", "cards", "playlists", "compendium", "settings", "macros"];
-      sidebarTabIds.forEach(id => {
-        const key = `player-${user.id}-sidebar-tab-${id}`;
-        if (formData[key]) {
-          playerSettings.hiddenSidebarTabs.push(id);
-        }
+        SIDEBAR_TAB_IDS.forEach(id => {
+          const key = `player-${user.id}-sidebar-tab-${id}`;
+          if (formData[key]) {
+            playerSettings.hiddenSidebarTabs.push(id);
+          }
         });
 
         perPlayerSettings[user.id] = playerSettings;

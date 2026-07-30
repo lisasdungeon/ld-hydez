@@ -1,7 +1,7 @@
 {
   "id": "ld-hydez",
   "title": "LD Hydez",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "description": "Hotbar customization with per-user visibility rules, presets, opacity control, and animated interface hiding for Foundry VTT.",
   "protected": false,
   "compatibility": {
@@ -12,8 +12,7 @@
     {
       "name": "Lisa's Dungeon",
       "url": "https://github.com/lisasdungeon",
-      "discord": "mystrysslysa_97536",
-      "patreon": "https://patreon.com/LisasDungeon"
+      "discord": "mystrysslysa_97536"
     }
   ],
   "url": "https://github.com/lisasdungeon/ld-hydez",
@@ -34,7 +33,7 @@
     }
   ],
   "changelog": "https://github.com/lisasdungeon/ld-hydez/releases",
-  "readme": "https://github.com/lisasdungeon/ld-hydez/blob/main/README.md",
-  "license": "https://github.com/lisasdungeon/ld-hydez/blob/main/LICENSE",
+  "readme": "https://github.com/lisasdungeon/ld-hydez/blob/master/README.md",
+  "license": "https://github.com/lisasdungeon/ld-hydez/blob/master/LICENSE",
   "bugs": "https://github.com/lisasdungeon/ld-hydez/issues"
 }

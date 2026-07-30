@@ -115,7 +115,7 @@
             <label class="page-toggle">
               <input class="page-checkbox" type="checkbox" name="page-{{n}}" data-page="{{n}}" {{#if hidden}}checked{{/if}}>
               <span>{{localize "LDH.Config.Pages.Page"}} {{n}}</span>
-              <small>{{localize "LDH.Config.Pages.Slots"}} {{multiply (subtract n 1) 10}}-{{multiply n 10}}</small>
+              <small>{{localize "LDH.Config.Pages.Slots"}} {{add (multiply (subtract n 1) 10) 1}}-{{multiply n 10}}</small>
             </label>
           {{/each}}
         </div>

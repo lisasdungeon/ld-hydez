@@ -63,3 +63,8 @@ export const KEYBINDINGS = {
 export const CSS_IDS = {
   STYLE_ELEMENT: "hide-hotbar-buttons-style"
 };
+
+export const SIDEBAR_TAB_IDS = Object.freeze([
+  "chat", "combat", "scenes", "actors", "items", "journal",
+  "tables", "cards", "playlists", "compendium", "settings", "macros"
+]);

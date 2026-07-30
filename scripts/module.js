@@ -11,9 +11,9 @@ import { initHook, readyHook, renderMacroDirectoryHook, hotbarCollapseHook } fro
 
 // Register Handlebars helpers
 function registerHelpers() {
-  Handlebars.registerHelper('math', (a, b) => a * b);
   Handlebars.registerHelper('subtract', (a, b) => a - b);
   Handlebars.registerHelper('multiply', (a, b) => a * b);
+  Handlebars.registerHelper('add', (a, b) => a + b);
   Handlebars.registerHelper('localize', (key, options) => {
     const data = options?.hash ?? {};
     const localized = game.i18n.localize(key);
