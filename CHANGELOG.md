@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.3.2
+
+- Renamed the repository's default branch from `master` to `main`.
+- Switched the manifest to a version-pinned download URL and a raw-file manifest URL, matching the convention used across the rest of the module collection.
+
 ## 2.3.1
 
 - Fixed imported configuration files (Export/Import, and preset data) being trusted without validation: hidden-slot, hidden-page, sidebar-tab, opacity, and animation-duration values from an imported file are interpolated directly into a world-wide dynamically generated stylesheet, so a crafted or shared config file could have injected arbitrary CSS into every connected client. Imports are now validated the same way the form's own save path already validates its input.

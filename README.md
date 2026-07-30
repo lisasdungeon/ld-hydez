@@ -24,7 +24,7 @@ Hotbar customization for Foundry Virtual Tabletop with per-user visibility rules
 3. Paste the manifest URL:
 
    ```text
-   https://github.com/lisasdungeon/ld-hydez/releases/latest/download/module.json
+   https://raw.githubusercontent.com/lisasdungeon/ld-hydez/main/module.json
    ```
 
 4. Install the module and enable it for your world.
