@@ -2,6 +2,16 @@
 
 Hotbar customization for Foundry Virtual Tabletop with per-user visibility rules, presets, opacity controls, and animated interface hiding.
 
+## Screenshots
+
+| Global (GM) settings | Hotbar slots & pages |
+| --- | --- |
+| ![Global settings tab](screenshots/gm-global-settings.png) | ![Hotbar slots and pages](screenshots/hotbar-slots-pages.png) |
+
+| Sidebar tabs, presets & import/export | In-game |
+| --- | --- |
+| ![Sidebar tabs, presets, and advanced import/export](screenshots/sidebar-presets-advanced.png) | ![Configured hotbar and scene controls in a live game](screenshots/in-game.png) |
+
 ## Features
 
 - Hide individual hotbar slots
@@ -46,4 +56,4 @@ Hotbar customization for Foundry Virtual Tabletop with per-user visibility rules
 
 ## License
 
-LD Proprietary License. See `LICENSE`.
+MIT License. See `LICENSE`.

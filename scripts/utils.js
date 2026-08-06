@@ -1,6 +1,6 @@
 /**
- * Copyright © 2025 Lisa's Dungeon / LD
- * All Rights Reserved
+ * Copyright © 2026 Lisa's Dungeon
+ * Licensed under the MIT License. See LICENSE for details.
  */
 
 import { MODULE_ID, CSS_IDS, SIDEBAR_TAB_IDS } from "./constants.js";
@@ -8,7 +8,7 @@ import { MODULE_ID, CSS_IDS, SIDEBAR_TAB_IDS } from "./constants.js";
 function i18n(key, data = {}) {
   const localized = game.i18n?.localize?.(key);
   if (!localized || localized === key) return key;
-  return foundry.utils.formatString(localized, data);
+  return game.i18n.format(key, data);
 }
 
 /**

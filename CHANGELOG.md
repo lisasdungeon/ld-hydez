@@ -1,5 +1,21 @@
 # Changelog
 
+## 2.3.5
+
+- Migrated the configuration hub (`HideHotbarConfig`) from the deprecated V1 `FormApplication` framework to `ApplicationV2` + `HandlebarsApplicationMixin`, and its preset/delete dialogs from `Dialog` to `DialogV2`. V1 support is being removed in Foundry v16; this clears the deprecation warning shown on every open of the hub.
+- Split preset save/load/delete and config export/import out of `config.js` into a new `presets.js`, keeping both files under this repo's 500-line-per-file limit after the migration.
+- Added a real render-path test (`tests/config.test.mjs`) covering the per-player override fix and the GM `applyToGM` + hide-option save path against the actual class, instead of only ad-hoc scripts.
+
+## 2.3.4
+
+- Fixed a critical bug where enabling the module broke the entire Foundry UI (hotbar, sidebar, players list, scene navigation, scene controls, placeables directory all failed to render) immediately on load. The module registered its own global Handlebars `localize` helper under the same name Foundry core already uses everywhere, silently replacing it; the replacement then called `foundry.utils.formatString`, which doesn't exist, so every core template using `{{localize}}` threw and failed to render. Removed the duplicate helper entirely — Foundry's own `localize` helper already does everything this module's templates need.
+- Fixed the same underlying bug in the module's own `localize()` utility (used to build labels in the GM configuration hub itself), which also called the nonexistent `foundry.utils.formatString` and would have crashed the hub's own render once the Handlebars collision above was fixed. Now uses `game.i18n.format`.
+
+## 2.3.3
+
+- Added a GM-only scene controls (left toolbar) button that opens the configuration hub, so it no longer has to be reached through the Macro Directory footer button or the Ctrl+Alt+H keybinding alone.
+- Fixed "Hide Scene Controls", "Hide Chat", "Hide Players List", and "Hide Scene Navigation" applying to the GM's own view immediately, even with "Apply to GM" left unchecked. These now respect "Apply to GM" the same way every other visibility toggle already did, so enabling one of these for players no longer also blinds the GM.
+
 ## 2.3.2
 
 - Renamed the repository's default branch from `master` to `main`.

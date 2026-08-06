@@ -1,6 +1,6 @@
 /**
- * Copyright © 2025 Lisa's Dungeon / LD
- * All Rights Reserved
+ * Copyright © 2026 Lisa's Dungeon
+ * Licensed under the MIT License. See LICENSE for details.
  */
 
 import { SETTINGS } from "./constants.js";
@@ -234,111 +234,113 @@ export function updateHotbarStyles() {
     }
   }
 
-  // Hide Chat Box (applies to everyone regardless of GM status)
-  if (hideChat) {
-    css += `
-      #chat,
-      #chat-log,
-      #chat-form,
-      #chat-controls,
-      #chat-message,
-      .sidebar-tab[data-tab="chat"],
-      #sidebar #chat {
-        opacity: 0 !important;
-        visibility: hidden !important;
-        pointer-events: none !important;
-        transform: translateX(20px) !important;
-        transition: opacity ${animationDuration}ms ease-in-out, transform ${animationDuration}ms ease-in-out, visibility ${animationDuration}ms ease-in-out !important;
-      }
-    `;
-  } else {
-    // Ensure chat is visible if not hidden
-    css += `
-      #chat,
-      #chat-log,
-      #chat-form,
-      #chat-controls,
-      #chat-message,
-      .sidebar-tab[data-tab="chat"],
-      #sidebar #chat {
-        opacity: 1 !important;
-        visibility: visible !important;
-        pointer-events: all !important;
-        transform: translateX(0) !important;
-      }
-    `;
-  }
+  // Hide Chat Box (only for non-GM, unless applyToGM is set - same gate as the other UI toggles)
+  if (!isGM || applyToGM) {
+    if (hideChat) {
+      css += `
+        #chat,
+        #chat-log,
+        #chat-form,
+        #chat-controls,
+        #chat-message,
+        .sidebar-tab[data-tab="chat"],
+        #sidebar #chat {
+          opacity: 0 !important;
+          visibility: hidden !important;
+          pointer-events: none !important;
+          transform: translateX(20px) !important;
+          transition: opacity ${animationDuration}ms ease-in-out, transform ${animationDuration}ms ease-in-out, visibility ${animationDuration}ms ease-in-out !important;
+        }
+      `;
+    } else {
+      // Ensure chat is visible if not hidden
+      css += `
+        #chat,
+        #chat-log,
+        #chat-form,
+        #chat-controls,
+        #chat-message,
+        .sidebar-tab[data-tab="chat"],
+        #sidebar #chat {
+          opacity: 1 !important;
+          visibility: visible !important;
+          pointer-events: all !important;
+          transform: translateX(0) !important;
+        }
+      `;
+    }
 
-  // Hide Player List (applies to everyone regardless of GM status)
-  if (hidePlayers) {
-    css += `
-      #players,
-      #player-list,
-      .player-list {
-        opacity: 0 !important;
-        visibility: hidden !important;
-        pointer-events: none !important;
-        transform: translateY(-20px) !important;
-        transition: opacity ${animationDuration}ms ease-in-out, transform ${animationDuration}ms ease-in-out, visibility ${animationDuration}ms ease-in-out !important;
-      }
-    `;
-  }
+    // Hide Player List
+    if (hidePlayers) {
+      css += `
+        #players,
+        #player-list,
+        .player-list {
+          opacity: 0 !important;
+          visibility: hidden !important;
+          pointer-events: none !important;
+          transform: translateY(-20px) !important;
+          transition: opacity ${animationDuration}ms ease-in-out, transform ${animationDuration}ms ease-in-out, visibility ${animationDuration}ms ease-in-out !important;
+        }
+      `;
+    }
 
-  // Hide Scene Navigation (applies to everyone regardless of GM status)
-  if (hideSceneNavigation) {
-    css += `
-      #navigation,
-      #nav,
-      .scene-navigation,
-      nav#scene-navigation {
-        opacity: 0 !important;
-        visibility: hidden !important;
-        pointer-events: none !important;
-        transform: translateY(-20px) !important;
-        transition: opacity ${animationDuration}ms ease-in-out, transform ${animationDuration}ms ease-in-out, visibility ${animationDuration}ms ease-in-out !important;
-      }
-    `;
-  } else {
-    // Ensure scene navigation is visible if not hidden
-    css += `
-      #navigation,
-      #nav,
-      .scene-navigation,
-      nav#scene-navigation {
-        opacity: 1 !important;
-        visibility: visible !important;
-        pointer-events: all !important;
-        transform: translateY(0) !important;
-      }
-    `;
-  }
+    // Hide Scene Navigation
+    if (hideSceneNavigation) {
+      css += `
+        #navigation,
+        #nav,
+        .scene-navigation,
+        nav#scene-navigation {
+          opacity: 0 !important;
+          visibility: hidden !important;
+          pointer-events: none !important;
+          transform: translateY(-20px) !important;
+          transition: opacity ${animationDuration}ms ease-in-out, transform ${animationDuration}ms ease-in-out, visibility ${animationDuration}ms ease-in-out !important;
+        }
+      `;
+    } else {
+      // Ensure scene navigation is visible if not hidden
+      css += `
+        #navigation,
+        #nav,
+        .scene-navigation,
+        nav#scene-navigation {
+          opacity: 1 !important;
+          visibility: visible !important;
+          pointer-events: all !important;
+          transform: translateY(0) !important;
+        }
+      `;
+    }
 
-  // Hide Scene Controls (Left Tools) - applies to everyone regardless of GM status
-  if (hideSceneControls) {
-    css += `
-      #controls,
-      .scene-control,
-      ol#controls,
-      #controls > *,
-      .control-tools,
-      div#controls,
-      #controls-list,
-      .controls-list,
-      #ui-left #controls,
-      #ui-left,
-      .control-tools-list,
-      #controls li,
-      #controls .scene-control,
-      .scene-controls,
-      #scene-controls {
-        opacity: 0 !important;
-        visibility: hidden !important;
-        pointer-events: none !important;
-        transform: translateX(-20px) !important;
-        transition: opacity ${animationDuration}ms ease-in-out, transform ${animationDuration}ms ease-in-out, visibility ${animationDuration}ms ease-in-out !important;
-        display: none !important;
-      }
-    `;
+    // Hide Scene Controls (Left Tools)
+    if (hideSceneControls) {
+      css += `
+        #controls,
+        .scene-control,
+        ol#controls,
+        #controls > *,
+        .control-tools,
+        div#controls,
+        #controls-list,
+        .controls-list,
+        #ui-left #controls,
+        #ui-left,
+        .control-tools-list,
+        #controls li,
+        #controls .scene-control,
+        .scene-controls,
+        #scene-controls {
+          opacity: 0 !important;
+          visibility: hidden !important;
+          pointer-events: none !important;
+          transform: translateX(-20px) !important;
+          transition: opacity ${animationDuration}ms ease-in-out, transform ${animationDuration}ms ease-in-out, visibility ${animationDuration}ms ease-in-out !important;
+          display: none !important;
+        }
+      `;
+    }
   }
 
   if (effectiveHiddenSidebarTabs.size > 0) {

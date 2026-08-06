@@ -17,6 +17,7 @@ test.beforeEach(() => installMocks());
 test.afterEach(() => { resetMocks(); restoreGlobals(); });
 
 test('updateHotbarStyles hides nothing and leaves chat/players visible with all defaults', async () => {
+  installMocks({ user: { id: 'p1', isGM: false } });
   registerDefaults();
   const { updateHotbarStyles } = await import('../scripts/styles.js');
   updateHotbarStyles();
@@ -113,7 +114,7 @@ test('per-player settings are ignored for the GM even if present', async () => {
   });
   const { updateHotbarStyles } = await import('../scripts/styles.js');
   updateHotbarStyles();
-  assert.match(getCss(), /#chat,[\s\S]*visibility: visible/);
+  assert.ok(!/#chat,[\s\S]*visibility: hidden/.test(getCss()));
 });
 
 test('opacity below 100 applies a scaled opacity rule to visible slots', async () => {
@@ -124,12 +125,38 @@ test('opacity below 100 applies a scaled opacity rule to visible slots', async (
   assert.match(getCss(), /opacity: 0\.5 !important/);
 });
 
-test('hideChat and hidePlayers apply regardless of GM status', async () => {
+test('hideChat and hidePlayers do not affect the GM unless applyToGM is set', async () => {
   installMocks({ user: { id: 'gm1', isGM: true } });
   registerDefaults({ hideChat: true, hidePlayers: true, applyToGM: false });
   const { updateHotbarStyles } = await import('../scripts/styles.js');
   updateHotbarStyles();
   const css = getCss();
+  assert.ok(!/#chat,[\s\S]*visibility: hidden/.test(css));
+  assert.ok(!css.includes('#players,'));
+});
+
+test('hideChat and hidePlayers affect the GM when applyToGM is true', async () => {
+  installMocks({ user: { id: 'gm1', isGM: true } });
+  registerDefaults({ hideChat: true, hidePlayers: true, applyToGM: true });
+  const { updateHotbarStyles } = await import('../scripts/styles.js');
+  updateHotbarStyles();
+  const css = getCss();
   assert.match(css, /#chat,[\s\S]*visibility: hidden/);
   assert.match(css, /#players,[\s\S]*visibility: hidden/);
+});
+
+test('hideSceneControls does not affect the GM unless applyToGM is set (so the GM keeps access to the toolbar button)', async () => {
+  installMocks({ user: { id: 'gm1', isGM: true } });
+  registerDefaults({ hideSceneControls: true, applyToGM: false });
+  const { updateHotbarStyles } = await import('../scripts/styles.js');
+  updateHotbarStyles();
+  assert.ok(!getCss().includes('#controls,'));
+});
+
+test('hideSceneControls hides the toolbar for a player', async () => {
+  installMocks({ user: { id: 'p1', isGM: false } });
+  registerDefaults({ hideSceneControls: true });
+  const { updateHotbarStyles } = await import('../scripts/styles.js');
+  updateHotbarStyles();
+  assert.match(getCss(), /#controls,[\s\S]*display: none/);
 });

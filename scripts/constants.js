@@ -1,6 +1,6 @@
 /**
- * Copyright © 2025 Lisa's Dungeon / LD
- * All Rights Reserved
+ * Copyright © 2026 Lisa's Dungeon
+ * Licensed under the MIT License. See LICENSE for details.
  */
 
 export const MODULE_ID = "ld-hydez";

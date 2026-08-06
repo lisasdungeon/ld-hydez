@@ -80,6 +80,21 @@ export function installMocks(options = {}) {
   const ui = { notifications: { info() {}, warn() {}, error() {} } };
   const foundry = { utils: { mergeObject: (a, b) => ({ ...a, ...b }), formatString: (str) => str } };
 
+  class ApplicationV2 {
+    static DEFAULT_OPTIONS = {};
+    element = { querySelector: () => null, querySelectorAll: () => [] };
+    render() { return this; }
+    close() { return this; }
+    _prepareContext() { return {}; }
+    _onRender() {}
+  }
+  const HandlebarsApplicationMixin = (Base) => class extends Base {};
+  class DialogV2 {
+    static async input() { return null; }
+    static async confirm() { return false; }
+  }
+  foundry.applications = { api: { ApplicationV2, HandlebarsApplicationMixin, DialogV2 } };
+
   globalThis.game = game;
   globalThis.ui = ui;
   globalThis.document = doc;

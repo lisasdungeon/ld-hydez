@@ -55,6 +55,14 @@
   overflow: auto;
 }
 
+.ld-hydez-config .tab {
+  display: none;
+}
+
+.ld-hydez-config .tab.active {
+  display: block;
+}
+
 .ld-hydez-config__panel {
   margin-bottom: 1rem;
   padding: 1rem;

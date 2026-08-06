@@ -1,18 +1,17 @@
-<form class="ld-hydez-config" autocomplete="off">
-  <header class="ld-hydez-config__header">
-    <div>
-      <h1>{{title}}</h1>
-      <p>{{globalNotes}}</p>
-    </div>
-  </header>
+<header class="ld-hydez-config__header">
+  <div>
+    <h1>{{title}}</h1>
+    <p>{{globalNotes}}</p>
+  </div>
+</header>
 
-  <nav class="sheet-tabs tabs main-tabs" data-group="primary" aria-label="{{title}}">
-    <a class="item" data-tab="gm">{{gmTabLabel}}</a>
-    <a class="item" data-tab="players">{{playerTabLabel}}</a>
-  </nav>
+<nav class="sheet-tabs tabs main-tabs" aria-label="{{title}}">
+  <a class="item {{tabs.gm.cssClass}}" data-action="tab" data-group="primary" data-tab="gm">{{gmTabLabel}}</a>
+  <a class="item {{tabs.players.cssClass}}" data-action="tab" data-group="primary" data-tab="players">{{playerTabLabel}}</a>
+</nav>
 
-  <section class="content">
-    <div class="tab" data-group="primary" data-tab="gm">
+<section class="content">
+  <div class="tab {{tabs.gm.cssClass}}" data-group="primary" data-tab="gm">
       <section class="ld-hydez-config__panel">
         <h2>{{globalHeader}}</h2>
         <p class="notes">{{globalNotes}}</p>
@@ -93,8 +92,8 @@
             <p class="notes">{{localize "LDH.Config.Slots.Notes"}}</p>
           </div>
           <div class="ld-hydez-config__actions">
-            <button type="button" class="select-all-slots">{{localize "LDH.Config.Slots.SelectAll"}}</button>
-            <button type="button" class="select-none-slots">{{localize "LDH.Config.Slots.ClearAll"}}</button>
+            <button type="button" data-action="selectAllSlots">{{localize "LDH.Config.Slots.SelectAll"}}</button>
+            <button type="button" data-action="selectNoneSlots">{{localize "LDH.Config.Slots.ClearAll"}}</button>
           </div>
         </div>
         <div class="ld-hydez-config__slots">
@@ -139,14 +138,14 @@
         <h2>{{presetsHeader}}</h2>
         <p class="notes">{{localize "LDH.Config.Presets.Notes"}}</p>
         <div class="ld-hydez-config__preset-row">
-          <select name="load-preset" class="load-preset">
+          <select name="load-preset" class="load-preset" title="{{localize "LDH.Config.Presets.Select"}}">
             <option value="">{{localize "LDH.Config.Presets.Select"}}</option>
             {{#each presets}}
               <option value="{{index}}" {{#if selected}}selected{{/if}}>{{name}}</option>
             {{/each}}
           </select>
-          <button type="button" class="save-preset">{{localize "LDH.Config.Presets.SaveNew"}}</button>
-          <button type="button" class="delete-preset">{{localize "LDH.Config.Presets.Delete"}}</button>
+          <button type="button" data-action="savePreset">{{localize "LDH.Config.Presets.SaveNew"}}</button>
+          <button type="button" data-action="deletePreset">{{localize "LDH.Config.Presets.Delete"}}</button>
         </div>
       </section>
 
@@ -154,13 +153,13 @@
         <h2>{{advancedHeader}}</h2>
         <p class="notes">{{localize "LDH.Config.Advanced.Notes"}}</p>
         <div class="ld-hydez-config__actions">
-          <button type="button" class="export-config">{{localize "LDH.Config.Advanced.ExportButton"}}</button>
-          <button type="button" class="import-config">{{localize "LDH.Config.Advanced.ImportButton"}}</button>
+          <button type="button" data-action="exportConfig">{{localize "LDH.Config.Advanced.ExportButton"}}</button>
+          <button type="button" data-action="importConfig">{{localize "LDH.Config.Advanced.ImportButton"}}</button>
         </div>
       </section>
     </div>
 
-    <div class="tab" data-group="primary" data-tab="players">
+    <div class="tab {{tabs.players.cssClass}}" data-group="primary" data-tab="players">
       {{#if players.length}}
         {{#each players}}
           <section class="ld-hydez-config__panel player-panel">
@@ -184,8 +183,8 @@
             <div class="ld-hydez-config__panel-header">
               <h3>{{../hotbarSlotsHeader}}</h3>
               <div class="ld-hydez-config__actions">
-                <button type="button" class="select-all-player-slots" data-player="{{id}}">{{localize "LDH.Config.Slots.SelectAll"}}</button>
-                <button type="button" class="select-none-player-slots" data-player="{{id}}">{{localize "LDH.Config.Slots.ClearAll"}}</button>
+                <button type="button" data-action="selectAllPlayerSlots" data-player="{{id}}">{{localize "LDH.Config.Slots.SelectAll"}}</button>
+                <button type="button" data-action="selectNonePlayerSlots" data-player="{{id}}">{{localize "LDH.Config.Slots.ClearAll"}}</button>
               </div>
             </div>
             <div class="ld-hydez-config__slots">
@@ -225,12 +224,11 @@
         </section>
       {{/if}}
     </div>
-  </section>
+</section>
 
-  <footer class="sheet-footer flexrow">
-    <button type="submit">
-      <i class="fas fa-save"></i>
-      {{localize "LDH.Config.Save"}}
-    </button>
-  </footer>
-</form>
+<footer class="sheet-footer flexrow">
+  <button type="submit">
+    <i class="fas fa-save"></i>
+    {{localize "LDH.Config.Save"}}
+  </button>
+</footer>

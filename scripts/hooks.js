@@ -1,6 +1,6 @@
 /**
- * Copyright © 2025 Lisa's Dungeon / LD
- * All Rights Reserved
+ * Copyright © 2026 Lisa's Dungeon
+ * Licensed under the MIT License. See LICENSE for details.
  */
 
 import { MODULE_ID, KEYBINDINGS } from "./constants.js";
@@ -69,4 +69,24 @@ export function renderMacroDirectoryHook(app, html) {
  */
 export function hotbarCollapseHook() {
   setTimeout(() => updateHotbarStyles(), 100);
+}
+
+/**
+ * Scene controls hook - add a GM-only toolbar button that opens the config hub
+ */
+export function getSceneControlButtonsHook(controls) {
+  if (!game.user.isGM) return;
+
+  const tokenControls = controls?.tokens;
+  if (!tokenControls?.tools) return;
+
+  tokenControls.tools.ldHydez = {
+    name: "ldHydez",
+    title: game.i18n.localize("LDH.Title"),
+    icon: "fas fa-eye-slash",
+    order: Object.keys(tokenControls.tools).length,
+    button: true,
+    visible: true,
+    onChange: () => new HideHotbarConfig().render(true)
+  };
 }

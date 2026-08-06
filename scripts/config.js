@@ -1,38 +1,65 @@
 /**
- * Copyright © 2025 Lisa's Dungeon / LD
- * All Rights Reserved
+ * Copyright © 2026 Lisa's Dungeon
+ * Licensed under the MIT License. See LICENSE for details.
  */
 
 import { MODULE_ID, SETTINGS, HOTBAR, SIDEBAR_TAB_IDS } from "./constants.js";
-import {
-  getSetting, setSetting, isValidSlot, log, notify, localize,
-  sanitizeHiddenSlots, sanitizeHiddenPages, sanitizeSidebarTabs, sanitizePerPlayerSettings
-} from "./utils.js";
+import { getSetting, setSetting, isValidSlot, log, notify, localize } from "./utils.js";
 import { updateHotbarStyles } from "./styles.js";
+import { loadPreset, savePreset, deletePreset, exportConfig, importConfig } from "./presets.js";
+
+const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
 /**
  * Configuration form for Hide Hotbar Buttons
  */
-export class HideHotbarConfig extends FormApplication {
-  static get defaultOptions() {
-    return foundry.utils.mergeObject(super.defaultOptions, {
-      title: game.i18n.localize("LDH.Config.Title"),
-      id: "hide-hotbar-config",
-      template: `modules/${MODULE_ID}/templates/settings.html`,
+export class HideHotbarConfig extends HandlebarsApplicationMixin(ApplicationV2) {
+  static DEFAULT_OPTIONS = {
+    id: "hide-hotbar-config",
+    tag: "form",
+    classes: ["ld-hydez-config"],
+    window: {
+      title: "LDH.Config.Title",
+      icon: "fas fa-eye-slash"
+    },
+    position: {
       width: 700,
-      height: "auto",
-      closeOnSubmit: true,
-      tabs: [
-        {
-          navSelector: ".main-tabs",
-          contentSelector: ".content",
-          initial: "gm"
-        }
-      ]
-    });
-  }
+      height: "auto"
+    },
+    form: {
+      handler: HideHotbarConfig.#onSubmit,
+      closeOnSubmit: true
+    },
+    actions: {
+      selectAllSlots: HideHotbarConfig.#onSelectAllSlots,
+      selectNoneSlots: HideHotbarConfig.#onSelectNoneSlots,
+      savePreset,
+      deletePreset,
+      exportConfig,
+      importConfig,
+      selectAllPlayerSlots: HideHotbarConfig.#onSelectAllPlayerSlots,
+      selectNonePlayerSlots: HideHotbarConfig.#onSelectNonePlayerSlots
+    }
+  };
 
-  getData() {
+  static PARTS = {
+    form: {
+      template: `modules/${MODULE_ID}/templates/settings.html`,
+      root: true,
+      scrollable: [".content"]
+    }
+  };
+
+  static TABS = {
+    primary: {
+      tabs: [{ id: "gm" }, { id: "players" }],
+      initial: "gm"
+    }
+  };
+
+  async _prepareContext(options) {
+    const context = await super._prepareContext(options);
+
     const hiddenSlots = getSetting(SETTINGS.HIDDEN_SLOTS);
     const hideBackground = getSetting(SETTINGS.HIDE_BACKGROUND);
     const applyToGM = getSetting(SETTINGS.APPLY_TO_GM);
@@ -52,7 +79,7 @@ export class HideHotbarConfig extends FormApplication {
     const presets = getSetting(SETTINGS.PRESETS);
     const activePreset = getSetting(SETTINGS.ACTIVE_PRESET);
     const perPlayerSettings = getSetting(SETTINGS.PER_PLAYER_SETTINGS) || {};
-    
+
     log(`getData: hiddenSidebarTabs from settings: ${hiddenSidebarTabs.join(", ")}`);
 
     // Build slots array
@@ -133,6 +160,7 @@ export class HideHotbarConfig extends FormApplication {
     }));
 
     return {
+      ...context,
       slots,
       pages,
       sidebarTabs,
@@ -168,227 +196,64 @@ export class HideHotbarConfig extends FormApplication {
     };
   }
 
-  activateListeners(html) {
-    super.activateListeners(html);
+  /** @override */
+  _onRender(context, options) {
+    super._onRender(context, options);
 
-    // Select all/none buttons
-    html.find(".select-all-slots").click(() => this._selectAllSlots(html, true));
-    html.find(".select-none-slots").click(() => this._selectAllSlots(html, false));
-    
-    // Page selection
-    html.find(".page-checkbox").change((ev) => this._onPageCheckboxChange(ev, html));
-    
-    // Preset buttons
-    html.find(".save-preset").click(() => this._savePreset(html));
-    html.find(".load-preset").change((ev) => this._loadPreset(ev));
-    html.find(".delete-preset").click(() => this._deletePreset(html));
-    
-    // Export/Import
-    html.find(".export-config").click(() => this._exportConfig());
-    html.find(".import-config").click(() => this._importConfig());
-
-    // Per-player controls
-    html.find(".select-all-player-slots").click((ev) => this._selectAllPlayerSlots(ev, html, true));
-    html.find(".select-none-player-slots").click((ev) => this._selectAllPlayerSlots(ev, html, false));
-    html.find(".page-checkbox-player").change((ev) => this._onPlayerPageCheckboxChange(ev, html));
+    this.element.querySelectorAll(".page-checkbox").forEach(el => {
+      el.addEventListener("change", (ev) => this._onPageCheckboxChange(ev));
+    });
+    this.element.querySelectorAll(".load-preset").forEach(el => {
+      el.addEventListener("change", (ev) => loadPreset.call(this, ev));
+    });
+    this.element.querySelectorAll(".page-checkbox-player").forEach(el => {
+      el.addEventListener("change", (ev) => this._onPlayerPageCheckboxChange(ev));
+    });
   }
 
-  _selectAllSlots(html, select) {
-    html.find("input[name^='slot-']").prop("checked", select);
-  }
-
-  _onPageCheckboxChange(event, html) {
+  _onPageCheckboxChange(event) {
     const page = parseInt(event.target.dataset.page);
     const checked = event.target.checked;
-    const slots = Array.from({ length: 10 }, (_, i) => (page - 1) * 10 + i + 1);
-    
+    const slots = Array.from({ length: HOTBAR.SLOTS_PER_PAGE }, (_, i) => (page - 1) * HOTBAR.SLOTS_PER_PAGE + i + 1);
+
     slots.forEach(slot => {
-      html.find(`input[name='slot-${slot}']`).prop("checked", checked);
+      const input = this.element.querySelector(`input[name='slot-${slot}']`);
+      if (input) input.checked = checked;
     });
   }
 
-  _selectAllPlayerSlots(event, html, select) {
-    const playerId = $(event.target).data("player");
-    html.find(`input[name^='player-${playerId}-slot-']`).prop("checked", select);
-  }
-
-  _onPlayerPageCheckboxChange(event, html) {
-    const playerId = $(event.target).data("player");
-    const page = parseInt($(event.target).data("page"));
+  _onPlayerPageCheckboxChange(event) {
+    const playerId = event.target.dataset.player;
+    const page = parseInt(event.target.dataset.page);
     const checked = event.target.checked;
-    const slots = Array.from({ length: 10 }, (_, i) => (page - 1) * 10 + i + 1);
-    
+    const slots = Array.from({ length: HOTBAR.SLOTS_PER_PAGE }, (_, i) => (page - 1) * HOTBAR.SLOTS_PER_PAGE + i + 1);
+
     slots.forEach(slot => {
-      html.find(`input[name='player-${playerId}-slot-${slot}']`).prop("checked", checked);
+      const input = this.element.querySelector(`input[name='player-${playerId}-slot-${slot}']`);
+      if (input) input.checked = checked;
     });
   }
 
-  async _savePreset() {
-    const name = await Dialog.prompt({
-      title: localize("LDH.Dialog.SavePresetTitle"),
-      content: `<input type="text" name="preset-name" placeholder="${localize("LDH.Dialog.SavePresetPlaceholder")}" autofocus>`,
-      callback: (html) => html.find("input[name='preset-name']").val()
-    });
-
-    if (!name) return;
-
-    const presets = getSetting(SETTINGS.PRESETS) || [];
-    const config = {
-      hiddenSlots: getSetting(SETTINGS.HIDDEN_SLOTS),
-      hideBackground: getSetting(SETTINGS.HIDE_BACKGROUND),
-      hideLeftControls: getSetting(SETTINGS.HIDE_LEFT_CONTROLS),
-      hideRightControls: getSetting(SETTINGS.HIDE_RIGHT_CONTROLS),
-      opacity: getSetting(SETTINGS.OPACITY),
-      hiddenPages: getSetting(SETTINGS.HIDDEN_PAGES)
-    };
-
-    presets.push({ name, config });
-    await setSetting(SETTINGS.PRESETS, presets);
-    notify(localize("LDH.Notify.PresetSaved", { name }), "info");
-    this.render();
+  static #onSelectAllSlots(event, target) {
+    this.element.querySelectorAll("input[name^='slot-']").forEach(el => { el.checked = true; });
   }
 
-  async _loadPreset(event) {
-    const index = parseInt(event.target.value);
-    const presets = getSetting(SETTINGS.PRESETS) || [];
-    const preset = presets[index];
-
-    if (!preset) return;
-
-    const { config } = preset;
-    await setSetting(SETTINGS.HIDDEN_SLOTS, config.hiddenSlots);
-    await setSetting(SETTINGS.HIDE_BACKGROUND, config.hideBackground);
-    await setSetting(SETTINGS.HIDE_LEFT_CONTROLS, config.hideLeftControls);
-    await setSetting(SETTINGS.HIDE_RIGHT_CONTROLS, config.hideRightControls);
-    await setSetting(SETTINGS.OPACITY, config.opacity);
-    await setSetting(SETTINGS.HIDDEN_PAGES, config.hiddenPages || []);
-    await setSetting(SETTINGS.ACTIVE_PRESET, preset.name);
-
-    updateHotbarStyles();
-    notify(localize("LDH.Notify.PresetLoaded", { name: preset.name }), "info");
-    this.render();
+  static #onSelectNoneSlots(event, target) {
+    this.element.querySelectorAll("input[name^='slot-']").forEach(el => { el.checked = false; });
   }
 
-  async _deletePreset(html) {
-    const select = html.find("select[name='load-preset']");
-    const index = parseInt(select.val());
-    const presets = getSetting(SETTINGS.PRESETS) || [];
-
-    if (index < 0 || index >= presets.length) return;
-
-    const confirmed = await Dialog.confirm({
-      title: localize("LDH.Dialog.DeletePresetTitle"),
-      content: `<p>${localize("LDH.Dialog.DeletePresetContent", { name: presets[index].name })}</p>`
-    });
-
-    if (!confirmed) return;
-
-    presets.splice(index, 1);
-    await setSetting(SETTINGS.PRESETS, presets);
-    notify(localize("LDH.Notify.PresetDeleted"), "info");
-    this.render();
+  static #onSelectAllPlayerSlots(event, target) {
+    const playerId = target.dataset.player;
+    this.element.querySelectorAll(`input[name^='player-${playerId}-slot-']`).forEach(el => { el.checked = true; });
   }
 
-  async _exportConfig() {
-    const config = {
-      hiddenSlots: getSetting(SETTINGS.HIDDEN_SLOTS),
-      hideBackground: getSetting(SETTINGS.HIDE_BACKGROUND),
-      applyToGM: getSetting(SETTINGS.APPLY_TO_GM),
-      hideLeftControls: getSetting(SETTINGS.HIDE_LEFT_CONTROLS),
-      hideRightControls: getSetting(SETTINGS.HIDE_RIGHT_CONTROLS),
-      hideSidebar: getSetting(SETTINGS.HIDE_SIDEBAR),
-      hideSceneControls: getSetting(SETTINGS.HIDE_SCENE_CONTROLS),
-      hideEntireHotbar: getSetting(SETTINGS.HIDE_ENTIRE_HOTBAR),
-      hideChat: getSetting(SETTINGS.HIDE_CHAT),
-      hidePlayers: getSetting(SETTINGS.HIDE_PLAYERS),
-      hideSceneNavigation: getSetting(SETTINGS.HIDE_SCENE_NAVIGATION),
-      hideMacroDirectory: getSetting(SETTINGS.HIDE_MACRO_DIRECTORY),
-      opacity: getSetting(SETTINGS.OPACITY),
-      animationDuration: getSetting(SETTINGS.ANIMATION_DURATION),
-      hiddenPages: getSetting(SETTINGS.HIDDEN_PAGES),
-      hiddenSidebarTabs: getSetting(SETTINGS.HIDDEN_SIDEBAR_TABS),
-      presets: getSetting(SETTINGS.PRESETS),
-      perPlayerSettings: getSetting(SETTINGS.PER_PLAYER_SETTINGS)
-    };
-
-    const json = JSON.stringify(config, null, 2);
-    const blob = new Blob([json], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "ld-hydez-config.json";
-    a.click();
-    URL.revokeObjectURL(url);
-    notify(localize("LDH.Notify.ConfigExported"), "info");
+  static #onSelectNonePlayerSlots(event, target) {
+    const playerId = target.dataset.player;
+    this.element.querySelectorAll(`input[name^='player-${playerId}-slot-']`).forEach(el => { el.checked = false; });
   }
 
-  async _importConfig() {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = "application/json";
-    
-    input.onchange = async (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-
-      try {
-        const text = await file.text();
-        const config = JSON.parse(text);
-
-        // Every one of these values ends up interpolated into a dynamically
-        // generated, world-wide <style> element (see styles.js). An imported
-        // file is untrusted input - shared "preset" files are exactly the
-        // kind of thing that gets passed around a community - so every field
-        // is validated/clamped the same way the form's own save path
-        // (_updateObject) already validates its own formData, rather than
-        // being trusted as-is.
-        if (config.hiddenSlots) await setSetting(SETTINGS.HIDDEN_SLOTS, sanitizeHiddenSlots(config.hiddenSlots));
-        if (config.hideBackground !== undefined) await setSetting(SETTINGS.HIDE_BACKGROUND, Boolean(config.hideBackground));
-        if (config.applyToGM !== undefined) await setSetting(SETTINGS.APPLY_TO_GM, Boolean(config.applyToGM));
-        if (config.hideLeftControls !== undefined) await setSetting(SETTINGS.HIDE_LEFT_CONTROLS, Boolean(config.hideLeftControls));
-        if (config.hideRightControls !== undefined) await setSetting(SETTINGS.HIDE_RIGHT_CONTROLS, Boolean(config.hideRightControls));
-        if (config.hideSidebar !== undefined) await setSetting(SETTINGS.HIDE_SIDEBAR, Boolean(config.hideSidebar));
-        if (config.hideSceneControls !== undefined) await setSetting(SETTINGS.HIDE_SCENE_CONTROLS, Boolean(config.hideSceneControls));
-        if (config.hideEntireHotbar !== undefined) await setSetting(SETTINGS.HIDE_ENTIRE_HOTBAR, Boolean(config.hideEntireHotbar));
-        if (config.hideChat !== undefined) await setSetting(SETTINGS.HIDE_CHAT, Boolean(config.hideChat));
-        if (config.hidePlayers !== undefined) await setSetting(SETTINGS.HIDE_PLAYERS, Boolean(config.hidePlayers));
-        if (config.hideSceneNavigation !== undefined) await setSetting(SETTINGS.HIDE_SCENE_NAVIGATION, Boolean(config.hideSceneNavigation));
-        if (config.hideMacroDirectory !== undefined) await setSetting(SETTINGS.HIDE_MACRO_DIRECTORY, Boolean(config.hideMacroDirectory));
-        if (config.opacity !== undefined) await setSetting(SETTINGS.OPACITY, Math.min(100, Math.max(0, parseInt(config.opacity, 10) || 0)));
-        if (config.animationDuration !== undefined) await setSetting(SETTINGS.ANIMATION_DURATION, Math.min(1000, Math.max(0, parseInt(config.animationDuration, 10) || 0)));
-        if (config.hiddenPages) await setSetting(SETTINGS.HIDDEN_PAGES, sanitizeHiddenPages(config.hiddenPages));
-        if (config.hiddenSidebarTabs) await setSetting(SETTINGS.HIDDEN_SIDEBAR_TABS, sanitizeSidebarTabs(config.hiddenSidebarTabs));
-        if (Array.isArray(config.presets)) {
-          const presets = config.presets
-            .filter(preset => preset && typeof preset.name === "string" && preset.config && typeof preset.config === "object")
-            .map(preset => ({
-              name: preset.name,
-              config: {
-                hiddenSlots: sanitizeHiddenSlots(preset.config.hiddenSlots),
-                hideBackground: Boolean(preset.config.hideBackground),
-                hideLeftControls: Boolean(preset.config.hideLeftControls),
-                hideRightControls: Boolean(preset.config.hideRightControls),
-                opacity: Math.min(100, Math.max(0, parseInt(preset.config.opacity, 10) || 0)),
-                hiddenPages: sanitizeHiddenPages(preset.config.hiddenPages)
-              }
-            }));
-          await setSetting(SETTINGS.PRESETS, presets);
-        }
-        if (config.perPlayerSettings) await setSetting(SETTINGS.PER_PLAYER_SETTINGS, sanitizePerPlayerSettings(config.perPlayerSettings));
-
-        updateHotbarStyles();
-        notify(localize("LDH.Notify.ConfigImported"), "info");
-        this.render();
-      } catch (error) {
-        log(`Error importing config: ${error}`, "error");
-        notify(localize("LDH.Notify.ImportFailed"), "error");
-      }
-    };
-
-    input.click();
-  }
-
-  async _updateObject(event, formData) {
+  static async #onSubmit(event, form, formData) {
+    const data = formData.object;
     try {
       const hiddenSlots = {};
       const hiddenPages = [];
@@ -398,12 +263,12 @@ export class HideHotbarConfig extends FormApplication {
       // Process slots
       for (let i = 1; i <= HOTBAR.MAX_SLOTS; i++) {
         if (!isValidSlot(i)) continue;
-        hiddenSlots[i] = formData[`slot-${i}`] || false;
+        hiddenSlots[i] = data[`slot-${i}`] || false;
       }
 
       // Process pages
       for (let i = 1; i <= HOTBAR.MAX_PAGES; i++) {
-        if (formData[`page-${i}`]) {
+        if (data[`page-${i}`]) {
           hiddenPages.push(i);
         }
       }
@@ -411,7 +276,7 @@ export class HideHotbarConfig extends FormApplication {
       // Process sidebar tabs
       SIDEBAR_TAB_IDS.forEach(id => {
         const key = `sidebar-tab-${id}`;
-        if (formData[key]) {
+        if (data[key]) {
           hiddenSidebarTabs.push(id);
         }
       });
@@ -419,15 +284,15 @@ export class HideHotbarConfig extends FormApplication {
       // Process per-player settings
       game.users.filter(u => !u.isGM).forEach(user => {
         const playerSettings = {
-          hideSceneControls: formData[`player-${user.id}-hideSceneControls`] || false,
-          hideSidebar: formData[`player-${user.id}-hideSidebar`] || false,
-          hideEntireHotbar: formData[`player-${user.id}-hideEntireHotbar`] || false,
-          hideBackground: formData[`player-${user.id}-hideBackground`] || false,
-          hideLeftControls: formData[`player-${user.id}-hideLeftControls`] || false,
-          hideRightControls: formData[`player-${user.id}-hideRightControls`] || false,
-          hideChat: formData[`player-${user.id}-hideChat`] || false,
-          hidePlayers: formData[`player-${user.id}-hidePlayers`] || false,
-          hideSceneNavigation: formData[`player-${user.id}-hideSceneNavigation`] || false,
+          hideSceneControls: data[`player-${user.id}-hideSceneControls`] || false,
+          hideSidebar: data[`player-${user.id}-hideSidebar`] || false,
+          hideEntireHotbar: data[`player-${user.id}-hideEntireHotbar`] || false,
+          hideBackground: data[`player-${user.id}-hideBackground`] || false,
+          hideLeftControls: data[`player-${user.id}-hideLeftControls`] || false,
+          hideRightControls: data[`player-${user.id}-hideRightControls`] || false,
+          hideChat: data[`player-${user.id}-hideChat`] || false,
+          hidePlayers: data[`player-${user.id}-hidePlayers`] || false,
+          hideSceneNavigation: data[`player-${user.id}-hideSceneNavigation`] || false,
           hiddenSlots: {},
           hiddenPages: [],
           hiddenSidebarTabs: []
@@ -435,14 +300,14 @@ export class HideHotbarConfig extends FormApplication {
 
         // Process player-specific slots
         for (let i = 1; i <= HOTBAR.MAX_SLOTS; i++) {
-          if (formData[`player-${user.id}-slot-${i}`]) {
+          if (data[`player-${user.id}-slot-${i}`]) {
             playerSettings.hiddenSlots[i] = true;
           }
         }
 
         // Process player-specific pages
         for (let i = 1; i <= HOTBAR.MAX_PAGES; i++) {
-          if (formData[`player-${user.id}-page-${i}`]) {
+          if (data[`player-${user.id}-page-${i}`]) {
             playerSettings.hiddenPages.push(i);
           }
         }
@@ -450,35 +315,52 @@ export class HideHotbarConfig extends FormApplication {
         // Process player-specific sidebar tabs
         SIDEBAR_TAB_IDS.forEach(id => {
           const key = `player-${user.id}-sidebar-tab-${id}`;
-          if (formData[key]) {
+          if (data[key]) {
             playerSettings.hiddenSidebarTabs.push(id);
           }
         });
 
-        perPlayerSettings[user.id] = playerSettings;
+        // Only persist an override for this player if something was actually
+        // set for them. Otherwise every save (even one that never touches the
+        // Player tab) would write an all-false/empty entry for every player,
+        // and styles.js treats the mere presence of an entry as "this player
+        // has an override" - silently blocking the global settings from ever
+        // reaching them again.
+        const hasOverride = playerSettings.hideSceneControls || playerSettings.hideSidebar ||
+          playerSettings.hideEntireHotbar || playerSettings.hideBackground ||
+          playerSettings.hideLeftControls || playerSettings.hideRightControls ||
+          playerSettings.hideChat || playerSettings.hidePlayers ||
+          playerSettings.hideSceneNavigation ||
+          Object.keys(playerSettings.hiddenSlots).length > 0 ||
+          playerSettings.hiddenPages.length > 0 ||
+          playerSettings.hiddenSidebarTabs.length > 0;
+
+        if (hasOverride) {
+          perPlayerSettings[user.id] = playerSettings;
+        }
       });
 
       log(`Saving settings. FormData:`, "log");
       log(`Hidden tabs to save: ${hiddenSidebarTabs.join(", ")}`);
 
       await setSetting(SETTINGS.HIDDEN_SLOTS, hiddenSlots);
-      await setSetting(SETTINGS.HIDE_BACKGROUND, formData.hideBackground || false);
-      await setSetting(SETTINGS.APPLY_TO_GM, formData.applyToGM || false);
-      await setSetting(SETTINGS.HIDE_LEFT_CONTROLS, formData.hideLeftControls || false);
-      await setSetting(SETTINGS.HIDE_RIGHT_CONTROLS, formData.hideRightControls || false);
-      await setSetting(SETTINGS.HIDE_SIDEBAR, formData.hideSidebar || false);
-      await setSetting(SETTINGS.HIDE_SCENE_CONTROLS, formData.hideSceneControls || false);
-      await setSetting(SETTINGS.HIDE_ENTIRE_HOTBAR, formData.hideEntireHotbar || false);
-      await setSetting(SETTINGS.HIDE_CHAT, formData.hideChat || false);
-      await setSetting(SETTINGS.HIDE_PLAYERS, formData.hidePlayers || false);
-      await setSetting(SETTINGS.HIDE_SCENE_NAVIGATION, formData.hideSceneNavigation || false);
-      await setSetting(SETTINGS.HIDE_MACRO_DIRECTORY, formData.hideMacroDirectory || false);
+      await setSetting(SETTINGS.HIDE_BACKGROUND, data.hideBackground || false);
+      await setSetting(SETTINGS.APPLY_TO_GM, data.applyToGM || false);
+      await setSetting(SETTINGS.HIDE_LEFT_CONTROLS, data.hideLeftControls || false);
+      await setSetting(SETTINGS.HIDE_RIGHT_CONTROLS, data.hideRightControls || false);
+      await setSetting(SETTINGS.HIDE_SIDEBAR, data.hideSidebar || false);
+      await setSetting(SETTINGS.HIDE_SCENE_CONTROLS, data.hideSceneControls || false);
+      await setSetting(SETTINGS.HIDE_ENTIRE_HOTBAR, data.hideEntireHotbar || false);
+      await setSetting(SETTINGS.HIDE_CHAT, data.hideChat || false);
+      await setSetting(SETTINGS.HIDE_PLAYERS, data.hidePlayers || false);
+      await setSetting(SETTINGS.HIDE_SCENE_NAVIGATION, data.hideSceneNavigation || false);
+      await setSetting(SETTINGS.HIDE_MACRO_DIRECTORY, data.hideMacroDirectory || false);
       await setSetting(SETTINGS.HIDDEN_SIDEBAR_TABS, hiddenSidebarTabs);
-      await setSetting(SETTINGS.OPACITY, parseInt(formData.opacity) || 100);
-      await setSetting(SETTINGS.ANIMATION_DURATION, parseInt(formData.animationDuration) || 300);
+      await setSetting(SETTINGS.OPACITY, parseInt(data.opacity) || 100);
+      await setSetting(SETTINGS.ANIMATION_DURATION, parseInt(data.animationDuration) || 300);
       await setSetting(SETTINGS.HIDDEN_PAGES, hiddenPages);
       await setSetting(SETTINGS.PER_PLAYER_SETTINGS, perPlayerSettings);
-      
+
       updateHotbarStyles();
       notify(localize("LDH.Notify.SettingsSaved"), "info");
     } catch (error) {
