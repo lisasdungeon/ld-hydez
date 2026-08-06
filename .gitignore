@@ -36,3 +36,13 @@ desktop.ini
 .release-temp/
 module.zip
 *.zip
+node_modules/
+coverage/
+.nyc_output/
+build-staging/
+.release-staging/
+.release-temp/
+*.log
+.env
+.env.*
+!.env.example

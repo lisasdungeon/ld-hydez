@@ -1,11 +1,11 @@
 # Changelog
 
-## Unreleased
+## 2.3.6
 
+- Compliance and hardening release: sole Lisa's Dungeon authorship and contact fields (Discord MystryssLysa, email Lisasdungeon@gmail.com, Patreon LisasDungeon); lazy loading / trigger-based startup where needed; 500 LOC file cap; full source line coverage; no emoji or AI references in the shipped package.
 - Compliance pass: sole author Lisa's Dungeon with Discord MystryssLysa / email Lisasdungeon@gmail.com / Patreon LisasDungeon; enforce 500 LOC file cap; remove non-compliant branding and symbols where present.
 - Lazy-load the config Application: settings menu, keybinding, macro-directory button, and scene control open it via dynamic import only when triggered.
 - Full line coverage on all source files under `scripts/` (config, presets, styles, utils, hooks, settings, module).
-
 
 ## 2.3.5
 
