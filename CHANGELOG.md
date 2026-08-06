@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Compliance pass: sole author Lisa's Dungeon with Discord MystryssLysa / email Lisasdungeon@gmail.com / Patreon LisasDungeon; enforce 500 LOC file cap; remove non-compliant branding and symbols where present.
+
+
 ## 2.3.5
 
 - Migrated the configuration hub (`HideHotbarConfig`) from the deprecated V1 `FormApplication` framework to `ApplicationV2` + `HandlebarsApplicationMixin`, and its preset/delete dialogs from `Dialog` to `DialogV2`. V1 support is being removed in Foundry v16; this clears the deprecation warning shown on every open of the hub.

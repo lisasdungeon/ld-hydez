@@ -52,7 +52,8 @@ Hotbar customization for Foundry Virtual Tabletop with per-user visibility rules
 
 - GitHub: https://github.com/lisasdungeon/ld-hydez
 - Patreon: https://patreon.com/LisasDungeon
-- Discord: mystrysslysa_97536
+- Discord: MystryssLysa
+- Email: Lisasdungeon@gmail.com
 
 ## License
 
