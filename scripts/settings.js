@@ -1,11 +1,27 @@
 /**
  * Copyright © 2026 Lisa's Dungeon
  * Licensed under the MIT License. See LICENSE for details.
+ *
+ * Settings registration. The config Application class is loaded only when the
+ * settings menu is opened (lazy menu shell).
  */
 
 import { MODULE_ID, SETTINGS, DEFAULTS } from "./constants.js";
-import { HideHotbarConfig } from "./config.js";
 import { updateHotbarStyles } from "./styles.js";
+
+function createLazyConfigMenu() {
+  return class LazyHideHotbarConfig {
+    constructor(...args) {
+      this._args = args;
+    }
+
+    async render(...renderArgs) {
+      const { HideHotbarConfig } = await import("./config.js");
+      const app = new HideHotbarConfig(...this._args);
+      return app.render(...renderArgs);
+    }
+  };
+}
 
 /**
  * Register all module settings
@@ -190,13 +206,15 @@ export function registerSettings() {
     onChange: () => updateHotbarStyles()
   });
 
-  // Register menu
+  // Register menu — Application class loaded on open
   game.settings.registerMenu(MODULE_ID, "config", {
     name: game.i18n.localize("LDH.Settings.Config.Name"),
     label: game.i18n.localize("LDH.Settings.Config.Label"),
     hint: game.i18n.localize("LDH.Settings.Config.Hint"),
     icon: "fas fa-eye-slash",
-    type: HideHotbarConfig,
+    type: createLazyConfigMenu(),
     restricted: true
   });
 }
+
+export { createLazyConfigMenu };

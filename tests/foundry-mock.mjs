@@ -2,6 +2,18 @@ let originalGlobals;
 let settingsStore = new Map();
 let elementRegistry = new Map();
 
+/** Stable DialogV2 so modules that capture the class at import time keep working. */
+export class MockDialogV2 {
+  static inputResult = null;
+  static confirmResult = false;
+  static async input() {
+    return MockDialogV2.inputResult;
+  }
+  static async confirm() {
+    return MockDialogV2.confirmResult;
+  }
+}
+
 function createStyleElement(id) {
   const elem = {
     id,
@@ -19,7 +31,6 @@ const doc = {
   createElement(tag) {
     if (tag === "style") {
       const elem = createStyleElement(undefined);
-      // id is assigned by the caller after creation; track once set.
       const target = new Proxy(elem, {
         set(obj, prop, value) {
           obj[prop] = value;
@@ -29,7 +40,23 @@ const doc = {
       });
       return target;
     }
-    return { tagName: tag.toUpperCase() };
+    const listeners = {};
+    return {
+      tagName: String(tag).toUpperCase(),
+      className: "",
+      type: "",
+      innerHTML: "",
+      style: {},
+      addEventListener(type, fn) {
+        listeners[type] = listeners[type] || [];
+        listeners[type].push(fn);
+      },
+      click() {
+        for (const fn of listeners.click || []) fn({ type: "click" });
+      },
+      appendChild() {},
+      _listeners: listeners
+    };
   },
   head: {
     appendChild(elem) {
@@ -44,8 +71,11 @@ function makeSettings() {
     register(moduleId, key, config) {
       const storeKey = `${moduleId}.${key}`;
       if (!settingsStore.has(storeKey)) settingsStore.set(storeKey, config.default);
+      settingsStore.set(`${storeKey}__config`, config);
     },
-    registerMenu() {},
+    registerMenu(moduleId, key, config) {
+      settingsStore.set(`${moduleId}.menu.${key}`, config);
+    },
     get(moduleId, key) {
       const storeKey = `${moduleId}.${key}`;
       if (!settingsStore.has(storeKey)) throw new Error(`Setting not registered: ${storeKey}`);
@@ -66,19 +96,24 @@ export function installMocks(options = {}) {
       document: globalThis.document,
       Handlebars: globalThis.Handlebars,
       CONST: globalThis.CONST,
-      foundry: globalThis.foundry
+      foundry: globalThis.foundry,
+      Hooks: globalThis.Hooks,
+      Blob: globalThis.Blob,
+      URL: globalThis.URL
     };
   }
   resetMocks();
+  MockDialogV2.inputResult = null;
+  MockDialogV2.confirmResult = false;
 
   const game = {
     settings: makeSettings(),
     user: options.user ?? { id: "gm1", isGM: true },
     users: options.users ?? [{ id: "gm1", isGM: true, name: "GM", color: "#fff" }],
-    i18n: { localize: (key) => key, format: (key) => key }
+    i18n: { localize: (key) => key, format: (key, data) => key },
+    keybindings: { register() {} }
   };
   const ui = { notifications: { info() {}, warn() {}, error() {} } };
-  const foundry = { utils: { mergeObject: (a, b) => ({ ...a, ...b }), formatString: (str) => str } };
 
   class ApplicationV2 {
     static DEFAULT_OPTIONS = {};
@@ -89,12 +124,22 @@ export function installMocks(options = {}) {
     _onRender() {}
   }
   const HandlebarsApplicationMixin = (Base) => class extends Base {};
-  class DialogV2 {
-    static async input() { return null; }
-    static async confirm() { return false; }
-  }
-  foundry.applications = { api: { ApplicationV2, HandlebarsApplicationMixin, DialogV2 } };
 
+  const foundry = {
+    utils: { mergeObject: (a, b) => ({ ...a, ...b }), formatString: (str) => str },
+    applications: {
+      api: {
+        ApplicationV2,
+        HandlebarsApplicationMixin,
+        DialogV2: MockDialogV2
+      }
+    }
+  };
+
+  globalThis.Hooks = globalThis.Hooks || {
+    once() {},
+    on() {}
+  };
   globalThis.game = game;
   globalThis.ui = ui;
   globalThis.document = doc;
@@ -102,7 +147,7 @@ export function installMocks(options = {}) {
   globalThis.CONST = { KEYBINDING_PRECEDENCE: { NORMAL: 0 } };
   globalThis.Handlebars = { registerHelper() {} };
 
-  return { game, ui, document: doc };
+  return { game, ui, document: doc, DialogV2: MockDialogV2 };
 }
 
 export function resetMocks() {
@@ -112,9 +157,16 @@ export function resetMocks() {
 
 export function restoreGlobals() {
   if (!originalGlobals) return;
-  for (const [key, value] of Object.entries(originalGlobals)) globalThis[key] = value;
+  for (const [key, value] of Object.entries(originalGlobals)) {
+    if (value === undefined) delete globalThis[key];
+    else globalThis[key] = value;
+  }
 }
 
 export function getElementRegistry() {
   return elementRegistry;
+}
+
+export function getSettingsStore() {
+  return settingsStore;
 }

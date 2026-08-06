@@ -1,13 +1,20 @@
 /**
  * Copyright © 2026 Lisa's Dungeon
  * Licensed under the MIT License. See LICENSE for details.
+ *
+ * Hook handlers. Heavy config Application is dynamic-imported only when a GM
+ * opens the hub (keybinding, macro directory button, or scene control).
  */
 
 import { MODULE_ID, KEYBINDINGS } from "./constants.js";
-import { HideHotbarConfig } from "./config.js";
 import { updateHotbarStyles } from "./styles.js";
 import { log } from "./utils.js";
 import { escapeHtml } from "./utils/escapeHtml.js";
+
+async function openConfigHub() {
+  const { HideHotbarConfig } = await import("./config.js");
+  return new HideHotbarConfig().render(true);
+}
 
 /**
  * Initialize hook - register keybindings
@@ -21,7 +28,7 @@ export function initHook() {
     ],
     onDown: () => {
       if (game.user.isGM) {
-        new HideHotbarConfig().render(true);
+        openConfigHub();
       }
     },
     restricted: true,
@@ -52,7 +59,7 @@ export function renderMacroDirectoryHook(app, html) {
   button.type = "button";
   button.innerHTML = `<i class="fas fa-eye-slash"></i> ${escapeHtml(game.i18n.localize("LDH.Title"))}`;
   button.addEventListener("click", () => {
-    new HideHotbarConfig().render(true);
+    openConfigHub();
   });
 
   let footer = element.querySelector(".directory-footer");
@@ -87,6 +94,9 @@ export function getSceneControlButtonsHook(controls) {
     order: Object.keys(tokenControls.tools).length,
     button: true,
     visible: true,
-    onChange: () => new HideHotbarConfig().render(true)
+    onChange: () => openConfigHub()
   };
 }
+
+/** Exposed for unit tests. */
+export { openConfigHub };

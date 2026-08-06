@@ -1,8 +1,9 @@
 /**
  * Copyright © 2026 Lisa's Dungeon
  * Licensed under the MIT License. See LICENSE for details.
- * 
- * Main Module Entry Point
+ *
+ * Main Module Entry Point — registers settings and light hooks on init/ready.
+ * The config Application is dynamic-imported only when a GM opens it.
  */
 
 import { log } from "./utils.js";
@@ -10,7 +11,7 @@ import { registerSettings } from "./settings.js";
 import { initHook, readyHook, renderMacroDirectoryHook, hotbarCollapseHook, getSceneControlButtonsHook } from "./hooks.js";
 
 // Register Handlebars helpers
-function registerHelpers() {
+export function registerHelpers() {
   Handlebars.registerHelper('subtract', (a, b) => a - b);
   Handlebars.registerHelper('multiply', (a, b) => a * b);
   Handlebars.registerHelper('add', (a, b) => a + b);
@@ -26,24 +27,33 @@ function registerHelpers() {
   });
 }
 
-// Initialize on game init
-Hooks.once("init", async () => {
+export function onInit() {
   log("Initializing LD Hydez");
   registerSettings();
   registerHelpers();
   initHook();
-});
+}
 
-// Ready hook
-Hooks.once("ready", () => {
+export function onReady() {
   log("LD Hydez ready");
   readyHook();
-});
+}
 
-// Register event listeners
-Hooks.on("renderMacroDirectory", renderMacroDirectoryHook);
-Hooks.on("collapseHotbar", hotbarCollapseHook);
-Hooks.on("expandHotbar", hotbarCollapseHook);
-Hooks.on("getSceneControlButtons", getSceneControlButtonsHook);
+export function registerModuleHooks() {
+  Hooks.once("init", async () => {
+    onInit();
+  });
+
+  Hooks.once("ready", () => {
+    onReady();
+  });
+
+  Hooks.on("renderMacroDirectory", renderMacroDirectoryHook);
+  Hooks.on("collapseHotbar", hotbarCollapseHook);
+  Hooks.on("expandHotbar", hotbarCollapseHook);
+  Hooks.on("getSceneControlButtons", getSceneControlButtonsHook);
+}
+
+registerModuleHooks();
 
 log("Module loaded");

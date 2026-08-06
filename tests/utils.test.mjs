@@ -134,3 +134,53 @@ test('updateStyleElement creates and reuses a single style element', async () =>
   assert.equal(second, first);
   assert.equal(second.textContent, 'body { color: blue; }');
 });
+
+test('localize formats when the key resolves to a different string', async () => {
+  installMocks();
+  game.i18n.localize = (key) => (key === 'LDH.Ok' ? 'OK' : key);
+  game.i18n.format = (key, data) => `OK:${data?.name || ''}`;
+  const { localize } = await import('../scripts/utils.js');
+  assert.equal(localize('LDH.Ok', { name: 'x' }), 'OK:x');
+  assert.equal(localize('LDH.Missing'), 'LDH.Missing');
+});
+
+test('setSetting notifies and rethrows on failure', async () => {
+  installMocks();
+  const { setSetting } = await import('../scripts/utils.js');
+  game.settings.set = async () => {
+    throw new Error('write failed');
+  };
+  await assert.rejects(() => setSetting('slotOpacity', 1), /write failed/);
+});
+
+test('toggleClass adds and removes classes; no-ops for null element', async () => {
+  const { toggleClass } = await import('../scripts/utils.js');
+  const classes = new Set();
+  const el = {
+    classList: {
+      add: (c) => classes.add(c),
+      remove: (c) => classes.delete(c)
+    }
+  };
+  toggleClass(null, 'x', true);
+  toggleClass(el, 'hidden', true);
+  assert.ok(classes.has('hidden'));
+  toggleClass(el, 'hidden', false);
+  assert.ok(!classes.has('hidden'));
+});
+
+test('log and notify delegate to console and ui.notifications', async () => {
+  installMocks();
+  const logs = [];
+  const original = console.log;
+  console.log = (...a) => logs.push(a.join(' '));
+  try {
+    const { log, notify } = await import('../scripts/utils.js');
+    log('hello');
+    assert.ok(logs.some((l) => l.includes('hello')));
+    notify('msg', 'info');
+  } finally {
+    console.log = original;
+  }
+});
+

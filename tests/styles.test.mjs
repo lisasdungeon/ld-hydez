@@ -160,3 +160,54 @@ test('hideSceneControls hides the toolbar for a player', async () => {
   updateHotbarStyles();
   assert.match(getCss(), /#controls,[\s\S]*display: none/);
 });
+
+test('hideBackground strips hotbar background styles', async () => {
+  installMocks({ user: { id: 'p1', isGM: false } });
+  registerDefaults({ hideBackground: true });
+  const { updateHotbarStyles } = await import('../scripts/styles.js');
+  updateHotbarStyles();
+  assert.match(getCss(), /background: none !important/);
+});
+
+test('hideLeftControls and hideRightControls hide or restore control bars', async () => {
+  installMocks({ user: { id: 'p1', isGM: false } });
+  registerDefaults({ hideLeftControls: true, hideRightControls: true });
+  const { updateHotbarStyles } = await import('../scripts/styles.js');
+  updateHotbarStyles();
+  let css = getCss();
+  assert.match(css, /#hotbar-directory-controls/);
+  assert.match(css, /#hotbar-page-controls/);
+
+  installMocks({ user: { id: 'p1', isGM: false } });
+  registerDefaults({ hideLeftControls: false, hideRightControls: false });
+  updateHotbarStyles();
+  css = getCss();
+  assert.match(css, /pointer-events: all !important/);
+});
+
+test('hideSidebar hides the whole sidebar; otherwise may hide individual tabs', async () => {
+  installMocks({ user: { id: 'p1', isGM: false } });
+  registerDefaults({ hideSidebar: true });
+  const { updateHotbarStyles } = await import('../scripts/styles.js');
+  updateHotbarStyles();
+  assert.match(getCss(), /#sidebar\s*\{[\s\S]*visibility: hidden/);
+
+  installMocks({ user: { id: 'p1', isGM: false } });
+  registerDefaults({ hideSidebar: false, hiddenSidebarTabs: ['combat'] });
+  updateHotbarStyles();
+  assert.match(getCss(), /data-tab="combat"/);
+});
+
+test('hideSceneNavigation hides or restores the navigation strip', async () => {
+  installMocks({ user: { id: 'p1', isGM: false } });
+  registerDefaults({ hideSceneNavigation: true });
+  const { updateHotbarStyles } = await import('../scripts/styles.js');
+  updateHotbarStyles();
+  assert.match(getCss(), /#navigation,[\s\S]*visibility: hidden/);
+
+  installMocks({ user: { id: 'p1', isGM: false } });
+  registerDefaults({ hideSceneNavigation: false });
+  updateHotbarStyles();
+  assert.match(getCss(), /#navigation,[\s\S]*visibility: visible/);
+});
+
