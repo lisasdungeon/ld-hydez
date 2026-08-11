@@ -92,12 +92,15 @@ export class HideHotbarConfig extends HandlebarsApplicationMixin(ApplicationV2) 
       });
     }
 
-    // Build pages array
+    // Build pages array (precompute slot range to avoid missing Handlebars helpers)
     const pages = [];
     for (let i = 1; i <= HOTBAR.MAX_PAGES; i++) {
+      const start = (i - 1) * HOTBAR.SLOTS_PER_PAGE + 1;
+      const end = i * HOTBAR.SLOTS_PER_PAGE;
       pages.push({
         n: i,
-        hidden: hiddenPages.includes(i)
+        hidden: hiddenPages.includes(i),
+        slotRange: `${start}-${end}`
       });
     }
 
