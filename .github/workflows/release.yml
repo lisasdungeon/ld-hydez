@@ -1,0 +1,76 @@
+name: Release Module
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'module.json'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Read version
+        id: ver
+        run: |
+          VERSION=$(node -p "require('./module.json').version")
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Skip if release already exists
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if gh release view "${{ steps.ver.outputs.tag }}" >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "Release ${{ steps.ver.outputs.tag }} already exists — skipping."
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build package zip
+        if: steps.check.outputs.exists == 'false'
+        run: node scripts/build-release.mjs
+
+      - name: Rename zip
+        if: steps.check.outputs.exists == 'false'
+        run: mv module.zip "ld-hydez-v${{ steps.ver.outputs.version }}.zip"
+
+      - name: Create GitHub Release
+        if: steps.check.outputs.exists == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ steps.ver.outputs.tag }}" \
+            "ld-hydez-v${{ steps.ver.outputs.version }}.zip" \
+            --title "${{ steps.ver.outputs.tag }}" \
+            --notes "$(awk '/^## ${{ steps.ver.outputs.version }}/{flag=1; next} /^## /{flag=0} flag' CHANGELOG.md | sed '/./,$!d')" \
+            --target main
+
+      - name: Publish to Foundry VTT
+        if: steps.check.outputs.exists == 'false' && env.FOUNDRY_RELEASE_TOKEN != ''
+        env:
+          FOUNDRY_RELEASE_TOKEN: ${{ secrets.FOUNDRY_RELEASE_TOKEN }}
+        run: |
+          VERSION="${{ steps.ver.outputs.version }}"
+          TAG="${{ steps.ver.outputs.tag }}"
+          BODY=$(jq -n \
+            --arg id "ld-hydez" \
+            --arg version "$VERSION" \
+            --arg manifest "https://raw.githubusercontent.com/lisasdungeon/ld-hydez/main/module.json" \
+            --arg notes "https://github.com/lisasdungeon/ld-hydez/releases/tag/$TAG" \
+            --arg minimum "13" \
+            --arg verified "14" \
+            '{id: $id, release: {version: $version, manifest: $manifest, notes: $notes, compatibility: {minimum: $minimum, verified: $verified}}}')
+          curl -sS -X POST "https://foundryvtt.com/_api/packages/release_version/" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: ${FOUNDRY_RELEASE_TOKEN}" \
+            -d "$BODY"
