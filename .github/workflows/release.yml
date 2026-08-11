@@ -49,17 +49,25 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          NOTES=$(awk "/^## ${{ steps.ver.outputs.version }}/{flag=1; next} /^## /{flag=0} flag" CHANGELOG.md | sed '/./,$!d')
+          if [ -z "$NOTES" ]; then
+            NOTES="Release ${{ steps.ver.outputs.tag }}"
+          fi
           gh release create "${{ steps.ver.outputs.tag }}" \
             "ld-hydez-v${{ steps.ver.outputs.version }}.zip" \
             --title "${{ steps.ver.outputs.tag }}" \
-            --notes "$(awk '/^## ${{ steps.ver.outputs.version }}/{flag=1; next} /^## /{flag=0} flag' CHANGELOG.md | sed '/./,$!d')" \
+            --notes "$NOTES" \
             --target main
 
       - name: Publish to Foundry VTT
-        if: steps.check.outputs.exists == 'false' && env.FOUNDRY_RELEASE_TOKEN != ''
+        if: steps.check.outputs.exists == 'false'
         env:
           FOUNDRY_RELEASE_TOKEN: ${{ secrets.FOUNDRY_RELEASE_TOKEN }}
         run: |
+          if [ -z "$FOUNDRY_RELEASE_TOKEN" ]; then
+            echo "FOUNDRY_RELEASE_TOKEN secret not set — skipping Foundry publish."
+            exit 0
+          fi
           VERSION="${{ steps.ver.outputs.version }}"
           TAG="${{ steps.ver.outputs.tag }}"
           BODY=$(jq -n \
@@ -70,7 +78,9 @@ jobs:
             --arg minimum "13" \
             --arg verified "14" \
             '{id: $id, release: {version: $version, manifest: $manifest, notes: $notes, compatibility: {minimum: $minimum, verified: $verified}}}')
-          curl -sS -X POST "https://foundryvtt.com/_api/packages/release_version/" \
+          echo "Publishing $VERSION to Foundry..."
+          RESP=$(curl -sS -w "\n%{http_code}" -X POST "https://foundryvtt.com/_api/packages/release_version/" \
             -H "Content-Type: application/json" \
             -H "Authorization: ${FOUNDRY_RELEASE_TOKEN}" \
-            -d "$BODY"
+            -d "$BODY")
+          echo "$RESP"
