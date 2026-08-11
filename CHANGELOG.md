@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.7
+
+- Fixed settings menu crash on Foundry V14: the config template used Handlebars helpers `subtract`, `multiply`, and `add` that are not registered by Foundry. Page slot ranges are now precomputed in the application context and passed to the template as `slotRange`.
+
 ## 2.3.6
 
 - Compliance and hardening release: sole Lisa's Dungeon authorship and contact fields (Discord MystryssLysa, email Lisasdungeon@gmail.com, Patreon LisasDungeon); lazy loading / trigger-based startup where needed; 500 LOC file cap; full source line coverage; no emoji or AI references in the shipped package.
