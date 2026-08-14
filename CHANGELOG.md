@@ -19,7 +19,7 @@
 
 ## 2.3.4
 
-- Fixed a critical bug where enabling the module broke the entire Foundry UI (hotbar, sidebar, players list, scene navigation, scene controls, placeables directory all failed to render) immediately on load. The module registered its own global Handlebars `localize` helper under the same name Foundry core already uses everywhere, silently replacing it; the replacement then called `foundry.utils.formatString`, which doesn't exist, so every core template using `{{localize}}` threw and failed to render. Removed the duplicate helper entirely — Foundry's own `localize` helper already does everything this module's templates need.
+- Fixed a critical bug where enabling the module broke the entire Foundry UI (hotbar, sidebar, players list, scene navigation, scene controls, placeables directory all failed to render) immediately on load. The module registered its own global Handlebars `localize` helper under the same name Foundry core already uses everywhere, silently replacing it; the replacement then called `foundry.utils.formatString`, which doesn't exist, so every core template using `{{localize}}` threw and failed to render. Removed the duplicate helper entirely: Foundry's own `localize` helper already does everything this module's templates need.
 - Fixed the same underlying bug in the module's own `localize()` utility (used to build labels in the GM configuration hub itself), which also called the nonexistent `foundry.utils.formatString` and would have crashed the hub's own render once the Handlebars collision above was fixed. Now uses `game.i18n.format`.
 
 ## 2.3.3
