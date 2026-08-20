@@ -184,6 +184,7 @@ test('registerSettings registers all settings and a lazy config menu', async () 
   assert.equal(menus.length, 1);
   assert.equal(menus[0].key, 'config');
   assert.equal(typeof menus[0].config.type, 'function');
+  assert.equal(menus[0].config.type.prototype instanceof foundry.applications.api.ApplicationV2, true);
 
   const Lazy = createLazyConfigMenu();
   const shell = new Lazy();

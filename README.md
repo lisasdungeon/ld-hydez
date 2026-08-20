@@ -2,7 +2,7 @@
 
 Hotbar customization for Foundry Virtual Tabletop with per-user visibility rules, presets, opacity controls, and animated interface hiding.
 
-- Version: `2.3.10`
+- Version: `2.3.11`
 - Compatibility: Foundry VTT `13+` (verified `14`)
 - License: MIT
 

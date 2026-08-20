@@ -10,8 +10,15 @@ import { MODULE_ID, SETTINGS, DEFAULTS } from "./constants.js";
 import { updateHotbarStyles } from "./styles.js";
 
 function createLazyConfigMenu() {
-  return class LazyHideHotbarConfig {
+  return class LazyHideHotbarConfig extends foundry.applications.api.ApplicationV2 {
+    static DEFAULT_OPTIONS = {
+      id: "ld-hydez-lazy-config",
+      window: { title: "LD Hydez" },
+      position: { width: 10, height: 10 }
+    };
+
     constructor(...args) {
+      super();
       this._args = args;
     }
 

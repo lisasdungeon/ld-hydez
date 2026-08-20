@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.11
+
+- Fixed Foundry V14 init crash: the config settings menu now registers an ApplicationV2 subclass. The previous lazy shell was a plain class, which `registerMenu` rejects.
+
 ## 2.3.10
 
 - Manifest and download URLs now use `releases/latest/download/module.json` and `module.zip`. The previous raw GitHub file URL and version-pinned zip blocked Foundry auto-update.
