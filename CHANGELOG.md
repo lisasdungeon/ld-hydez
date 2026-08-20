@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.10
+
+- Manifest and download URLs now use `releases/latest/download/module.json` and `module.zip`. The previous raw GitHub file URL and version-pinned zip blocked Foundry auto-update.
+
 ## 2.3.9
 
 - Stopped registering global Handlebars helpers `subtract`, `multiply`, and `add`. Those names collide with other modules and are unused after slot ranges were precomputed.

@@ -2,7 +2,7 @@
 
 Hotbar customization for Foundry Virtual Tabletop with per-user visibility rules, presets, opacity controls, and animated interface hiding.
 
-- Version: `2.3.9`
+- Version: `2.3.10`
 - Compatibility: Foundry VTT `13+` (verified `14`)
 - License: MIT
 
@@ -38,7 +38,7 @@ Hotbar customization for Foundry Virtual Tabletop with per-user visibility rules
 3. Paste the manifest URL:
 
    ```text
-   https://raw.githubusercontent.com/lisasdungeon/ld-hydez/main/module.json
+   https://github.com/lisasdungeon/ld-hydez/releases/latest/download/module.json
    ```
 
 4. Install the module and enable it for your world.

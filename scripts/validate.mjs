@@ -34,6 +34,14 @@ assert(moduleJson.version === packageJson.version, "module.json and package.json
 assert(moduleJson.protected === false, "module.json must use protected: false.");
 assert(moduleJson.compatibility?.minimum === 13, "Minimum compatibility must be 13.");
 assert(moduleJson.compatibility?.verified === 14, "Verified compatibility must be 14.");
+assert(
+  /\/releases\/latest\/download\/module\.json$/.test(moduleJson.manifest),
+  "module.json manifest must use /releases/latest/download/module.json"
+);
+assert(
+  /\/releases\/latest\/download\/module\.zip$/.test(moduleJson.download),
+  "module.json download must use /releases/latest/download/module.zip"
+);
 
 const requiredFiles = [
   "module.json",
