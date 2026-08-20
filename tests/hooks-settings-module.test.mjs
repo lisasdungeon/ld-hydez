@@ -32,7 +32,7 @@ test('initHook registers the open-config keybinding and only opens for GM', asyn
   game.keybindings._regs[0].config.onDown();
 
   game.user.isGM = true;
-  // GM path triggers dynamic import — should not throw with our ApplicationV2 mock
+  // GM path triggers dynamic import. Should not throw with our ApplicationV2 mock.
   await game.keybindings._regs[0].config.onDown();
 });
 

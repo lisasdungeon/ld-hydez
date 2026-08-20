@@ -212,7 +212,7 @@ test('importConfig sanitizes and applies a JSON file; reports parse errors', asy
 
   try {
     await importConfig.call(app, null, null);
-    // onchange is async — wait a tick for the handler to finish
+    // onchange is async. Wait a tick for the handler to finish.
     await new Promise((r) => setTimeout(r, 20));
     assert.equal(game.settings.get(MODULE_ID, SETTINGS.HIDE_BACKGROUND), true);
     assert.equal(game.settings.get(MODULE_ID, SETTINGS.OPACITY), 100);

@@ -206,7 +206,7 @@ export function registerSettings() {
     onChange: () => updateHotbarStyles()
   });
 
-  // Register menu — Application class loaded on open
+  // Register menu. Application class loaded on open.
   game.settings.registerMenu(MODULE_ID, "config", {
     name: game.i18n.localize("LDH.Settings.Config.Name"),
     label: game.i18n.localize("LDH.Settings.Config.Label"),

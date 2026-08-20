@@ -141,7 +141,7 @@ test('page checkbox handlers toggle slot checkboxes for GM and player pages', as
   app._onPlayerPageCheckboxChange({
     target: { dataset: { player: 'p1', page: '1' }, checked: true }
   });
-  // player page uses name player-p1-slot-N — our querySelector only matches slot-N,
+  // player page uses name player-p1-slot-N. Our querySelector only matches slot-N,
   // so this path exercises the loop without asserting checked map.
 
   app._onRender({}, {});

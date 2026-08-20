@@ -2,7 +2,7 @@
  * Copyright © 2026 Lisa's Dungeon
  * Licensed under the MIT License. See LICENSE for details.
  *
- * Main Module Entry Point — registers settings and light hooks on init/ready.
+ * Main Module Entry Point. Registers settings and light hooks on init/ready.
  * The config Application is dynamic-imported only when a GM opens it.
  */
 
