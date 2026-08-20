@@ -12,15 +12,9 @@ import { initHook, readyHook, renderMacroDirectoryHook, hotbarCollapseHook, getS
 
 // Register Handlebars helpers
 export function registerHelpers() {
-  Handlebars.registerHelper('subtract', (a, b) => a - b);
-  Handlebars.registerHelper('multiply', (a, b) => a * b);
-  Handlebars.registerHelper('add', (a, b) => a + b);
-  // Note: no "localize" helper here. Foundry's core Handlebars environment
-  // already registers a "localize" helper (plain lookup, or game.i18n.format
-  // when hash args are passed) that every core template relies on
-  // (hotbar, sidebar, players, scene navigation, scene controls, etc).
-  // Registering our own under the same name overwrites Foundry's globally
-  // for the rest of the session, breaking every core template render.
+  // Do not register subtract/multiply/add globally. Those names collide with
+  // other modules and are unused after slot ranges were precomputed in context.
+  // Do not register localize. Foundry already provides it for core templates.
   Handlebars.registerHelper('includes', (collection, value) => {
     if (Array.isArray(collection)) return collection.includes(value);
     return false;

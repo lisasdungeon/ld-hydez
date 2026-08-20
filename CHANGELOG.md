@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.3.9
+
+- Stopped registering global Handlebars helpers `subtract`, `multiply`, and `add`. Those names collide with other modules and are unused after slot ranges were precomputed.
+- Scene control button now registers on both the v13 object-shaped controls and the array-shaped token tool list.
+
 ## 2.3.8
 
 - README version now matches the manifest

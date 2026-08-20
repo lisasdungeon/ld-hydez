@@ -81,20 +81,42 @@ export function hotbarCollapseHook() {
 /**
  * Scene controls hook - add a GM-only toolbar button that opens the config hub
  */
+function hydezTool() {
+  return {
+    name: "ldHydez",
+    title: game.i18n.localize("LDH.Title"),
+    icon: "fas fa-eye-slash",
+    button: true,
+    visible: true,
+    onChange: () => openConfigHub(),
+    onClick: () => openConfigHub()
+  };
+}
+
 export function getSceneControlButtonsHook(controls) {
   if (!game.user.isGM) return;
+
+  const tool = hydezTool();
+
+  if (Array.isArray(controls)) {
+    const tokens = controls.find((entry) => entry?.name === "token" || entry?.name === "tokens") || controls[0];
+    if (!tokens) return;
+    if (Array.isArray(tokens.tools)) {
+      if (tokens.tools.some((entry) => entry?.name === "ldHydez")) return;
+      tokens.tools.push(tool);
+      return;
+    }
+    tokens.tools = tokens.tools || {};
+    tokens.tools.ldHydez = { ...tool, order: Object.keys(tokens.tools).length };
+    return;
+  }
 
   const tokenControls = controls?.tokens;
   if (!tokenControls?.tools) return;
 
   tokenControls.tools.ldHydez = {
-    name: "ldHydez",
-    title: game.i18n.localize("LDH.Title"),
-    icon: "fas fa-eye-slash",
-    order: Object.keys(tokenControls.tools).length,
-    button: true,
-    visible: true,
-    onChange: () => openConfigHub()
+    ...tool,
+    order: Object.keys(tokenControls.tools).length
   };
 }
 

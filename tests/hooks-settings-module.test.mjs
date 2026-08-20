@@ -157,6 +157,20 @@ test('getSceneControlButtonsHook adds a GM-only tool', async () => {
   getSceneControlButtonsHook(controls);
   assert.ok(controls.tokens.tools.ldHydez);
   await controls.tokens.tools.ldHydez.onChange();
+
+  const tokenGroup = { name: "token", tools: [] };
+  const asArray = [tokenGroup];
+  getSceneControlButtonsHook(asArray);
+  assert.equal(tokenGroup.tools[0].name, "ldHydez");
+  getSceneControlButtonsHook(asArray);
+  assert.equal(tokenGroup.tools.length, 1);
+
+  const namedTokens = { name: "tokens", tools: {} };
+  getSceneControlButtonsHook([namedTokens]);
+  assert.ok(namedTokens.tools.ldHydez);
+  await namedTokens.tools.ldHydez.onClick();
+
+  getSceneControlButtonsHook([]);
 });
 
 test('registerSettings registers all settings and a lazy config menu', async () => {
@@ -209,9 +223,7 @@ test('registerHelpers and module lifecycle exports work', async () => {
 
   const mod = await import('../scripts/module.js');
   mod.registerHelpers();
-  assert.equal(helpers.subtract(5, 2), 3);
-  assert.equal(helpers.multiply(3, 4), 12);
-  assert.equal(helpers.add(1, 2), 3);
+  assert.equal(helpers.subtract, undefined);
   assert.equal(helpers.includes([1, 2], 2), true);
   assert.equal(helpers.includes([1, 2], 9), false);
   assert.equal(helpers.includes('nope', 1), false);
